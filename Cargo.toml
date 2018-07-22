@@ -1,0 +1,16 @@
+[package]
+name = "rusty_rogue"
+version = "0.1.0"
+authors = ["Erik Kirshey <ekirshey@gmail.com>"]
+
+[dependencies]
+clippy = {version = "*", optional = true}
+chrono = "0.4"
+
+[features]
+default = []
+
+[dependencies.cursive]
+version = "*"
+default-features = false
+features = ["pancurses-backend"]
