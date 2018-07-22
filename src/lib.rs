@@ -10,6 +10,7 @@ pub mod attack;
 pub mod stats;
 pub mod display;
 pub mod log;
+pub mod input;
 
 use std::collections::HashMap;
 use math::Vec2;
@@ -20,6 +21,7 @@ use goblin::Goblin;
 use attack::*;
 use display::Drawable;
 use log::Log;
+use input::{Input, MouseEvent, MouseButton};
 
 pub struct GameOptions {
     width : usize,
@@ -41,37 +43,6 @@ impl GameOptions {
             player_class
         }
     }
-}
-
-#[derive(PartialEq)]
-pub enum MouseButton {
-    Left,
-    Right,
-    // some variants omitted
-}
-
-#[derive(PartialEq)]
-pub enum MouseEvent {
-    Press(MouseButton),
-    Release(MouseButton),
-    Hold(MouseButton),
-    WheelUp,
-    WheelDown,
-}
-
-#[derive(PartialEq)]
-pub enum Input {
-    Left,
-    Right,
-    Up,
-    Down,
-    Key(char),
-    Mouse {
-        offset: Vec2,
-        position: Vec2,
-        event: MouseEvent,
-    },
-    Unknown
 }
 
 // Create Entity concept
@@ -174,9 +145,18 @@ impl Game {
         String::from("Hello!")
     }
 
-    fn process_move(&mut self,  x_dir : i32, y_dir : i32) {
+    fn process_move(&mut self, x_dir : i32, y_dir : i32) {
         let pos = self.player.position();
-        let new_pos = pos + Vec2::new(x_dir, y_dir);
+        if (pos.x as i32 + x_dir) < 0 {
+            let x_dir = 0;
+        }
+
+        if (pos.y as i32 + y_dir) < 0 {
+            let y_dir = 0;
+        }
+
+        let new_pos = Vec2::new((pos.x as i32 + x_dir) as usize, 
+                                (pos.y as i32 + y_dir) as usize);
         
         let mut blocked = false;
         for (uuid, mut m) in &mut self.entities {
@@ -191,8 +171,8 @@ impl Game {
         }
 
         if  !blocked &&
-            ( new_pos.x < self.world.width() as i32) && (new_pos.x >= 0) && 
-            ( new_pos.y < self.world.height() as i32) && (new_pos.y >= 0)
+            new_pos.x < self.world.width() && 
+            new_pos.y < self.world.height()
         {
             self.player.move_player(x_dir, y_dir);
         }

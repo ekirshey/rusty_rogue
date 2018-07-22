@@ -12,13 +12,13 @@ pub enum Class {
 
 pub struct Player {
     name : String,
-    pos : Vec2,
+    pos : Vec2<usize>,
     stats : StatBlock,
     facing : Facing
 }
 
 impl Player {
-    pub fn new(name : String, pos : Vec2) -> Self {
+    pub fn new(name : String, pos : Vec2<usize>) -> Self {
         Player {
             name,
             pos,
@@ -33,14 +33,22 @@ impl Player {
         Attack::new(AttackType::Piercing, damage, atk_pos)
     }
 
-    pub fn set_position(&mut self, x : i32, y : i32) {
+    pub fn set_position(&mut self, x : usize, y : usize) {
         self.pos.x = x;
         self.pos.y = y;
     }
 
     pub fn move_player(&mut self, x_dir : i32, y_dir : i32) {
-        self.pos.y += y_dir;
-        self.pos.x += x_dir;
+        if (self.pos.x as i32 + x_dir) < 0 {
+            let x_dir = 0;
+        }
+
+        if (self.pos.y as i32 + y_dir) < 0 {
+            let y_dir = 0;
+        }
+
+        self.pos.x = (self.pos.x as i32 + x_dir) as usize;
+        self.pos.y = (self.pos.y as i32 + y_dir) as usize;
 
         if x_dir > 0 {
             self.facing = Facing::East;
@@ -60,7 +68,7 @@ impl Player {
         
     }
 
-    pub fn position(&self) -> Vec2 {
+    pub fn position(&self) -> Vec2<usize> {
         self.pos
     }
 

@@ -1,7 +1,7 @@
 use super::math::*;
 
 pub struct DrawOutput {
-    pub position : Vec2,
+    pub position : Vec2<usize>,
     pub fg : Vec3<u8>,
     pub bg : Vec3<u8>,
     pub icon : char

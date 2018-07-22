@@ -17,7 +17,7 @@ pub enum AttackType {
 pub struct Attack {
     pub attack_type : AttackType,
     pub damage : i32,
-    pub position : Vec2
+    pub position : Vec2<usize>
 }
 
 pub struct CombatResult {
@@ -29,7 +29,7 @@ pub struct CombatResult {
 impl Attack {
     pub fn new( attack_type : AttackType, 
                 damage : i32, 
-                position : Vec2) -> Attack 
+                position : Vec2<usize>) -> Attack 
     {
         Attack {
             attack_type,
@@ -42,7 +42,7 @@ impl Attack {
 pub trait Attackable {
     fn send_attack(&self) -> Attack;
     fn receive_attack(&mut self, attack : &Attack) -> CombatResult; 
-    fn position(&self) -> &Vec2;
-    fn collision(&self, other : Vec2) -> bool;
+    fn position(&self) -> &Vec2<usize>;
+    fn collision(&self, other : Vec2<usize>) -> bool;
     fn alive(&self) -> bool;
 }

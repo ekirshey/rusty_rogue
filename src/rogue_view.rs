@@ -3,6 +3,8 @@ extern crate cursive;
 use super::player;
 use super::{ Game, GameOptions, Input};
 use super::world::Cell;
+use super::math;
+use super::input;
 
 use self::cursive::Printer;
 use self::cursive::theme::{BaseColor, Color, ColorStyle};
@@ -63,15 +65,15 @@ impl cursive::view::View for RogueView {
                 let bg = Color::Rgb(display.bg.x,display.bg.y,display.bg.z);
                 printer.with_color(
                     ColorStyle::new(fg, bg),
-                    |printer| printer.print((pos.x - camera.x as i32, pos.y - camera.y as i32), &symbol),
+                    |printer| printer.print((pos.x - camera.x, pos.y - camera.y), &symbol),
                 );
             }
         }
 
         let pos = player.position();
-        let pos_x = (pos.x - camera.x as i32) as u32;
-        let pos_y = (pos.y - camera.y as i32) as u32;
-        printer.print((pos_x, pos_y), "😻");
+        let pos_x = pos.x - camera.x;
+        let pos_y = pos.y - camera.y;
+        printer.print((pos_x, pos_y), "@");
 
         // Draw Borders
         printer.print_hline((0,camera.height), camera.width, "─");
@@ -90,7 +92,7 @@ impl cursive::view::View for RogueView {
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {
-        let mut input : Input = Input::Unknown;
+        let mut input : input::Input = Input::Unknown;
         if let Event::Key(key) = event {      
             input = match key {
                 Key::Right => Input::Right,
@@ -104,7 +106,12 @@ impl cursive::view::View for RogueView {
         //    input = Input::Key(key);
         //}
         else if let Event::Mouse{offset ,position, event} = event {
-            println!("{:?} {:?} {:?} ", offset, position, event );
+            println!("{:?} {:?} ",  position, event );
+            input = Input::Mouse{
+                offset : math::Vec2::new(offset.x,offset.y),
+                position : math::Vec2::new(position.x,position.y),
+                event : input::MouseEvent::WheelUp
+            };
         }
 
         if input != Input::Unknown {

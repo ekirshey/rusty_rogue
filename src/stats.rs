@@ -8,7 +8,7 @@ pub enum Facing {
     West
 }
 
-pub fn facing_position(facing : Facing, pos : Vec2) -> Vec2 {
+pub fn facing_position(facing : Facing, pos : Vec2<usize>) -> Vec2<usize> {
     match facing {
         Facing::North => Vec2::new(pos.x, pos.y + 1),
         Facing::East => Vec2::new(pos.x + 1, pos.y),

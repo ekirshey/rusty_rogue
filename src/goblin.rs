@@ -5,7 +5,7 @@ use super::stats::*;
 use super::display::*;
 
 pub struct Goblin {
-    pos : Vec2,
+    pos : Vec2<usize>,
     base_stats : StatBlock,
     curr_stats : StatBlock,
     facing : Facing,
@@ -13,7 +13,7 @@ pub struct Goblin {
 }
 
 impl Goblin {
-    pub fn new(pos : Vec2) -> Goblin {
+    pub fn new(pos : Vec2<usize>) -> Goblin {
         Goblin {
             pos,
             base_stats : StatBlock::new(30,10,10),
@@ -44,11 +44,11 @@ impl Attackable for Goblin {
         }
     }
 
-    fn position(&self) -> &Vec2 {
+    fn position(&self) -> &Vec2<usize> {
         &self.pos
     }
 
-    fn collision(&self, other : Vec2) -> bool {
+    fn collision(&self, other : Vec2<usize>) -> bool {
         self.alive && other == self.pos
     }
 

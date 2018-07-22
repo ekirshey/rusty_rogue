@@ -1,13 +1,12 @@
 use std::ops::Add;
-
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Vec2 {
-    pub x : i32,
-    pub y : i32
+pub struct Vec2<T> {
+    pub x : T,
+    pub y : T
 }
 
-impl Vec2 {
-    pub fn new(x : i32, y : i32) -> Vec2 {
+impl<T> Vec2<T> {
+    pub fn new(x : T, y : T) -> Vec2<T> {
         Vec2 {
             x,
             y
@@ -15,13 +14,13 @@ impl Vec2 {
     }
 }
 
-impl Add for Vec2 {
-    type Output = Vec2;
+impl<T: Add<Output=T>> Add for Vec2<T> {
+    type Output = Vec2<T>;
 
-    fn add(self, other: Vec2) -> Vec2 {
+    fn add(self, other: Vec2<T>) -> Vec2<T> {
         Vec2 {
             x : self.x + other.x,
-            y : self.y + other.y,
+            y : self.y + other.y
         }
     }
 }
