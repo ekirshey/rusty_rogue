@@ -21,7 +21,7 @@ use goblin::Goblin;
 use attack::*;
 use display::Drawable;
 use log::Log;
-use input::{Input, MouseEvent, MouseButton};
+use input::{Input};
 
 pub struct GameOptions {
     width : usize,
@@ -80,7 +80,7 @@ impl Game {
             camera : Camera::new(),
             step : false,
             log : Log::new(20),
-            uuid : uuid,
+            uuid,
             entities : m
         }
     }
@@ -146,17 +146,19 @@ impl Game {
     }
 
     fn process_move(&mut self, x_dir : i32, y_dir : i32) {
+        let mut lcl_x = x_dir;
+        let mut lcl_y = y_dir;
         let pos = self.player.position();
         if (pos.x as i32 + x_dir) < 0 {
-            let x_dir = 0;
+            lcl_x = 0;
         }
 
         if (pos.y as i32 + y_dir) < 0 {
-            let y_dir = 0;
+            lcl_y = 0;
         }
 
-        let new_pos = Vec2::new((pos.x as i32 + x_dir) as usize, 
-                                (pos.y as i32 + y_dir) as usize);
+        let new_pos = Vec2::new((pos.x as i32 + lcl_x) as usize, 
+                                (pos.y as i32 + lcl_y) as usize);
         
         let mut blocked = false;
         for (uuid, mut m) in &mut self.entities {
@@ -174,7 +176,7 @@ impl Game {
             new_pos.x < self.world.width() && 
             new_pos.y < self.world.height()
         {
-            self.player.move_player(x_dir, y_dir);
+            self.player.move_player(lcl_x, lcl_y);
         }
 
         self.step = true;

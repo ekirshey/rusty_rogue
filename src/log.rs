@@ -13,13 +13,13 @@ impl Log {
     pub fn new(max_size : usize) -> Log {
         Log {
             contents : Vec::new(),
-            max_size : max_size,
+            max_size,
             front : 0
         }
     }
 
     pub fn log_combat(&mut self, player : &Player, combat_results : &CombatResult) {
-        let mut log_msg = String::new();
+        let log_msg : String;
         let local : DateTime<Local> = Local::now();
 
         if combat_results.target_alive {
@@ -55,17 +55,14 @@ impl Log {
     }
 
     pub fn last_n_messages(&self, n : usize) -> &[String] {
-        if self.contents.len() == 0 {
+        if self.contents.is_empty() {
             return &[]
         }
 
-        let mut msg_count = n;
-        if n >= self.contents.len() {
-            msg_count = self.contents.len();
-        }
+        let msg_count = if n >= self.contents.len() {self.contents.len()} else {n};
 
         let start = self.contents.len() - msg_count;
         let end = self.contents.len();
-        return &self.contents[start..end];
+        &self.contents[start..end]
     }
 }

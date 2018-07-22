@@ -7,7 +7,7 @@ use super::math;
 use super::input;
 
 use self::cursive::Printer;
-use self::cursive::theme::{BaseColor, Color, ColorStyle};
+use self::cursive::theme::{Color, ColorStyle};
 use self::cursive::vec::Vec2;
 use self::cursive::direction::Direction;
 use self::cursive::event::{Event, EventResult, Key};
@@ -56,7 +56,7 @@ impl cursive::view::View for RogueView {
         }
 
         // draw entities
-        for (uuid, e) in self.game.entities().iter() {
+        for (_uuid, e) in self.game.entities().iter() {
             let display = e.draw();
             let pos = display.position;
             if camera.point_intersects(pos.x as usize, pos.y as usize) {
@@ -92,6 +92,9 @@ impl cursive::view::View for RogueView {
     }
 
     fn on_event(&mut self, event: Event) -> EventResult {
+        //else if let Event::Char(key) = event {
+        //    input = Input::Key(key);
+        //}
         let mut input : input::Input = Input::Unknown;
         if let Event::Key(key) = event {      
             input = match key {
@@ -102,9 +105,6 @@ impl cursive::view::View for RogueView {
                 _ => Input::Unknown
             };
         }
-        //else if let Event::Char(key) = event {
-        //    input = Input::Key(key);
-        //}
         else if let Event::Mouse{offset ,position, event} = event {
             println!("{:?} {:?} ",  position, event );
             input = Input::Mouse{

@@ -36,7 +36,7 @@ impl Camera {
         }
 
         let cam_y_max = ((self.y + self.height) as i32 -2) as usize;
-        let cam_y_min = (self.y + 2);
+        let cam_y_min = self.y + 2;
         if y > cam_y_max && (self.y + self.height) < y_bound {
             self.y += 1;
         }

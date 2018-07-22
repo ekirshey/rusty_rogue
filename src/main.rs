@@ -7,7 +7,7 @@ use rusty_rogue::rogue_view;
 
 use cursive::Cursive;
 use cursive::event::EventResult;
-use cursive::views::{Dialog, TextView, Button, OnEventView, BoxView, Checkbox,
+use cursive::views::{Dialog, TextView, Button, OnEventView, BoxView,
                      LinearLayout, SelectView, EditView};
 use cursive::traits::*;
 

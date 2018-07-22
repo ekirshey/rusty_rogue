@@ -39,30 +39,32 @@ impl Player {
     }
 
     pub fn move_player(&mut self, x_dir : i32, y_dir : i32) {
+        let mut lcl_x = x_dir;
+        let mut lcl_y = y_dir;
         if (self.pos.x as i32 + x_dir) < 0 {
-            let x_dir = 0;
+            lcl_x = 0;
         }
 
         if (self.pos.y as i32 + y_dir) < 0 {
-            let y_dir = 0;
+            lcl_y = 0;
         }
 
-        self.pos.x = (self.pos.x as i32 + x_dir) as usize;
-        self.pos.y = (self.pos.y as i32 + y_dir) as usize;
+        self.pos.x = (self.pos.x as i32 + lcl_x) as usize;
+        self.pos.y = (self.pos.y as i32 + lcl_y) as usize;
 
-        if x_dir > 0 {
+        if lcl_x > 0 {
             self.facing = Facing::East;
         }
 
-        if x_dir < 0 {
+        if lcl_x < 0 {
             self.facing = Facing::West;
         }
 
-        if y_dir > 0 {
+        if lcl_y > 0 {
             self.facing = Facing::North;
         }
         
-        if y_dir < 0 {
+        if lcl_y < 0 {
             self.facing = Facing::South;
         }
         
