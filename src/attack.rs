@@ -1,4 +1,5 @@
 use super::math::Vec2;
+use super::stats::StatBlock;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ElementalType {
@@ -45,4 +46,7 @@ pub trait Attackable {
     fn position(&self) -> &Vec2<usize>;
     fn collision(&self, other : Vec2<usize>) -> bool;
     fn alive(&self) -> bool;
+    fn base_stats(&self) -> &StatBlock;
+    fn current_stats(&self) -> &StatBlock;
+    fn name(&self) -> &str;
 }

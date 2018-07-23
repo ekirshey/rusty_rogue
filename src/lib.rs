@@ -21,7 +21,7 @@ use goblin::Goblin;
 use attack::*;
 use display::Drawable;
 use log::Log;
-use input::{Input};
+use input::{Input, MouseEvent, MouseButton};
 
 pub struct GameOptions {
     width : usize,
@@ -56,6 +56,7 @@ pub struct Game {
     step : bool,
     log : Log,
     uuid : u32,
+    target : Option<u32>,
     entities : HashMap<u32, Box<Entity>>
 }
 
@@ -81,6 +82,7 @@ impl Game {
             step : false,
             log : Log::new(20),
             uuid,
+            target : None,
             entities : m
         }
     }
@@ -95,24 +97,26 @@ impl Game {
         }
         
         for uuid in &rem {
-            println!("{}",uuid );
             self.entities.remove(uuid);
         }
     }
 
-    pub fn handle_input(&mut self, input : &Input) {
+    pub fn handle_input(&mut self, input : &Input) {    
         match input {
             Input::Right => self.process_move(1, 0),
             Input::Left => self.process_move(-1, 0),
             Input::Up => self.process_move(0, -1),
             Input::Down => self.process_move(0, 1),
             Input::Key(key) => self.process_char(*key),
+            Input::Mouse{offset, position, event} => self.process_mouse(*position, event),
             _ => {}
         }
-
+        
         // Update the camera
-        let pos = self.player.position();
-        self.camera.move_camera(pos.x, pos.y, self.world.width(), self.world.height());
+        {
+            let pos = self.player.position();
+            self.camera.move_camera(pos.x, pos.y, self.world.width(), self.world.height());
+        }
 
         // Player moved/attacked so update world
         if self.step {
@@ -136,7 +140,15 @@ impl Game {
     pub fn entities(&self) -> &HashMap<u32, Box<Entity>> {
         &self.entities
     }
+/*
+    pub fn target(&self) -> Option<&Entity> {
+        if let Some(uuid) = self.target {
+            return Some(&self.entities[&uuid]);
+        }
 
+        None
+    }
+*/
     pub fn get_log_messages(&self, msg_count : usize) -> &[String] {
         self.log.last_n_messages(msg_count)
     }
@@ -148,18 +160,22 @@ impl Game {
     fn process_move(&mut self, x_dir : i32, y_dir : i32) {
         let mut lcl_x = x_dir;
         let mut lcl_y = y_dir;
-        let pos = self.player.position();
-        if (pos.x as i32 + x_dir) < 0 {
-            lcl_x = 0;
-        }
+        let new_pos : Vec2<usize>;
 
-        if (pos.y as i32 + y_dir) < 0 {
-            lcl_y = 0;
-        }
+        {
+            let pos = self.player.position();
+            if (pos.x as i32 + x_dir) < 0 {
+                lcl_x = 0;
+            }
 
-        let new_pos = Vec2::new((pos.x as i32 + lcl_x) as usize, 
+            if (pos.y as i32 + y_dir) < 0 {
+                lcl_y = 0;
+            }
+
+            new_pos = Vec2::new((pos.x as i32 + lcl_x) as usize, 
                                 (pos.y as i32 + lcl_y) as usize);
-        
+        }
+
         let mut blocked = false;
         for (uuid, mut m) in &mut self.entities {
             if m.collision(new_pos) {
@@ -184,6 +200,16 @@ impl Game {
 
     fn process_char(&self, key : char) {
         println!("{}",key);
+    }
+
+    fn process_mouse(&mut self, position : Vec2<usize>, event : &input::MouseEvent)  {
+        if let MouseEvent::Press(MouseButton::Left) = event {
+            for (uuid, m) in &self.entities {
+                if m.collision(position) {
+                    self.target = Some(*uuid);
+                }
+            }
+        }
     }
 
 }

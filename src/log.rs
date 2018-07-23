@@ -1,8 +1,11 @@
 use super::chrono::prelude::*;
 
 use super::Player;
+use super::attack::Attackable;
 use super::attack::CombatResult;
 
+// Change it to hold a struct type so I can style the messages.
+// Like color the "killed" message red
 pub struct Log {
     contents : Vec<String>,
     max_size : usize,

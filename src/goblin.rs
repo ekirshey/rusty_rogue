@@ -55,6 +55,18 @@ impl Attackable for Goblin {
     fn alive(&self) -> bool {
         self.alive
     }
+
+    fn base_stats(&self) -> &StatBlock {
+        &self.base_stats
+    }
+
+    fn current_stats(&self) -> &StatBlock {
+        &self.curr_stats
+    }
+
+    fn name(&self) -> &str {
+        "a Goblin"
+    }
 }
 
 impl Drawable for Goblin {

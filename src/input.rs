@@ -4,7 +4,8 @@ use super::math::Vec2;
 #[derive(PartialEq)]
 pub enum MouseButton {
     Left,
-    Right
+    Right,
+    Unknown
 }
 
 #[derive(PartialEq)]

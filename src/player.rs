@@ -1,6 +1,8 @@
 use std::fmt;
 use super::math::Vec2;
+use super::math::Vec3;
 use super::attack::*;
+use super::display::*;
 use super::stats::*;
 
 #[derive(Debug, Copy, Clone)]
@@ -13,7 +15,8 @@ pub enum Class {
 pub struct Player {
     name : String,
     pos : Vec2<usize>,
-    stats : StatBlock,
+    base_stats : StatBlock,
+    curr_stats : StatBlock,
     facing : Facing
 }
 
@@ -22,15 +25,10 @@ impl Player {
         Player {
             name,
             pos,
-            stats : StatBlock::new(10, 10, 10),
+            base_stats : StatBlock::new(10, 10, 10),
+            curr_stats : StatBlock::new(10, 10, 10),
             facing : Facing::East
         }
-    }
-
-    pub fn send_attack(&self) -> Attack {
-        let atk_pos = facing_position(self.facing, self.pos);
-        let damage = (self.stats.strength * 3)/2;
-        Attack::new(AttackType::Piercing, damage, atk_pos)
     }
 
     pub fn set_position(&mut self, x : usize, y : usize) {
@@ -70,12 +68,61 @@ impl Player {
         
     }
 
-    pub fn position(&self) -> Vec2<usize> {
-        self.pos
+}
+
+impl Attackable for Player {
+    fn send_attack(&self) -> Attack {
+        let atk_pos = facing_position(self.facing, self.pos);
+        let damage = (self.curr_stats.strength * 3)/2;
+        Attack::new(AttackType::Piercing, damage, atk_pos)
     }
 
-    pub fn name(&self) -> &str {
+    fn receive_attack(&mut self, attack : &Attack) -> CombatResult {
+        self.curr_stats.health -= attack.damage;
+        
+        CombatResult {
+            dmg_dealt : attack.damage,
+            target_alive : self.alive(),
+            target_name : self.name.clone()
+        }
+    }
+
+    fn position(&self) -> &Vec2<usize> {
+        &self.pos
+    }
+
+    fn collision(&self, other : Vec2<usize>) -> bool {
+        other == self.pos
+    }
+
+    fn alive(&self) -> bool {
+        self.curr_stats.health <= 0
+    }
+
+    fn base_stats(&self) -> &StatBlock {
+        &self.base_stats
+    }
+
+    fn current_stats(&self) -> &StatBlock {
+        &self.curr_stats
+    }
+
+    fn name(&self) -> &str {
         &self.name
+    }
+}
+
+impl Drawable for Player {
+    fn draw(&self) -> DrawOutput {
+        let percent_health : f32 = self.curr_stats.health as f32 /self.base_stats.health as f32;
+        let red = (255.0 * (1.0-percent_health)) as u8;
+        let green = (255.0 *(percent_health)) as u8;
+        DrawOutput {
+            position : self.pos,
+            fg : Vec3::new(red, green, 0),
+            bg : Vec3::new(95,95,95),
+            icon : '@'
+        }
     }
 }
 

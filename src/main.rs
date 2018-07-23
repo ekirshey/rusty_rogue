@@ -7,6 +7,7 @@ use rusty_rogue::rogue_view;
 
 use cursive::Cursive;
 use cursive::event::EventResult;
+use cursive::view::SizeConstraint;
 use cursive::views::{Dialog, TextView, Button, OnEventView, BoxView,
                      LinearLayout, SelectView, EditView};
 use cursive::traits::*;
@@ -78,14 +79,15 @@ fn show_options(siv: &mut Cursive) {
 }
 
 fn new_game(siv: &mut Cursive, name : String, class : player::Class) {
-    let bv = BoxView::with_full_screen(rogue_view::RogueView::new(name, class).with_id("rogue"));
-    
+    let bv = BoxView::with_full_screen(
+                rogue_view::RogueView::new(siv.screen_size(), name, class).with_id("rogue"));
     let bv = OnEventView::new(bv)
         .on_pre_event('l', |s| {
             let inventory = s.call_on_id("rogue", | view: &mut rogue_view::RogueView| {
                 view.active_loot()
             }).unwrap();
-            println!("{}", inventory);
+            // Inventory stuff
+
             s.add_layer(
                 Dialog::new()
                     .title("Loot")
@@ -99,7 +101,7 @@ fn new_game(siv: &mut Cursive, name : String, class : player::Class) {
             Some(EventResult::Consumed(None))
         });
       
-    siv.add_layer(
+    siv.add_fullscreen_layer(
         bv
     );
 }
