@@ -22,6 +22,7 @@ use attack::*;
 use display::Drawable;
 use log::Log;
 use input::{Input, MouseEvent, MouseButton};
+use stats::StatBlock;
 
 pub struct GameOptions {
     width : usize,
@@ -93,6 +94,11 @@ impl Game {
         for (uuid, m) in &mut self.entities {
             if !m.alive() {
                 rem.push(*uuid);
+                if let Some(target_id) = self.target {
+                    if target_id == *uuid {
+                        self.target = None;
+                    }
+                }
             }
         }
         
@@ -140,15 +146,7 @@ impl Game {
     pub fn entities(&self) -> &HashMap<u32, Box<Entity>> {
         &self.entities
     }
-/*
-    pub fn target(&self) -> Option<&Entity> {
-        if let Some(uuid) = self.target {
-            return Some(&self.entities[&uuid]);
-        }
 
-        None
-    }
-*/
     pub fn get_log_messages(&self, msg_count : usize) -> &[String] {
         self.log.last_n_messages(msg_count)
     }
@@ -156,6 +154,41 @@ impl Game {
     pub fn active_loot(&self) -> String {
         String::from("Hello!")
     }
+
+    // Target Functions
+    // I can't seem to return a &Box<Entity> from a function
+    // Possibly because of lifetimes? Either way I'm making wrappers
+    // that take a uuid
+    pub fn active_target(&self) -> bool {
+        if let Some(uuid) = self.target {
+            return true;
+        }
+
+        false
+    }
+
+    pub fn target_name(&self) -> Option<&str> {
+        if let Some(uuid) = self.target {
+            return Some(self.entities[&uuid].name());
+        }
+        None
+    }
+
+    pub fn target_current_stats(&self) -> Option<&StatBlock> {
+        if let Some(uuid) = self.target {
+            return Some(self.entities[&uuid].current_stats());
+        }
+        None
+    }
+
+    pub fn target_base_stats(&self) -> Option<&StatBlock> {
+        if let Some(uuid) = self.target {
+            return Some(self.entities[&uuid].base_stats());
+        }
+        None
+    }
+ 
+    //
 
     fn process_move(&mut self, x_dir : i32, y_dir : i32) {
         let mut lcl_x = x_dir;
@@ -182,6 +215,7 @@ impl Game {
                 let attack = self.player.send_attack();
                 let result = m.receive_attack(&attack);
                 self.log.log_combat(&self.player, &result);
+                self.target = Some(*uuid);
                 if result.target_alive {
                     blocked = true;
                 }

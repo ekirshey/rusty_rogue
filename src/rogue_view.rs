@@ -35,10 +35,10 @@ impl RogueView {
         self.game.active_loot()
     }
 
-    fn draw_target_info(&self, start : Vec2, target : &Entity, printer: &Printer) {
-        let camera = self.game.camera();
-        let curr_stats = target.current_stats();
-        let base_stats = target.base_stats();
+    fn draw_player_info(&self, start : Vec2, printer: &Printer) {
+        let player = self.game.player();
+        let curr_stats = player.current_stats();
+        let base_stats = player.base_stats();
 
         let green = Color::Rgb(0,255,0);
         let bg = Color::Rgb(95,95,95);
@@ -50,7 +50,7 @@ impl RogueView {
         x += 6;
         printer.with_color(
             ColorStyle::new(green, bg),
-            |printer| printer.print((x,y), target.name())
+            |printer| printer.print((x,y), player.name())
         );
         y += 1;
         x = start.x;
@@ -73,7 +73,47 @@ impl RogueView {
             ColorStyle::new(green, bg),
             |printer| printer.print((x,y), base_health.as_ref())
         );
-        
+    }
+
+    fn draw_target_info(&self, start : Vec2, printer: &Printer) {
+        let camera = self.game.camera();
+        let curr_stats = self.game.target_current_stats().unwrap();
+        let base_stats = self.game.target_base_stats().unwrap();
+        let name = self.game.target_name().unwrap();
+
+        let green = Color::Rgb(0,255,0);
+        let bg = Color::Rgb(95,95,95);
+        let mut x = start.x;
+        let mut y = start.y;
+        printer.with_effect( Effect::Bold,
+            |printer| printer.print((x,y), "Name:")
+        );
+        x += 6;
+        printer.with_color(
+            ColorStyle::new(green, bg),
+            |printer| printer.print((x,y), name)
+        );
+        y += 1;
+        x = start.x;
+
+        printer.with_effect( Effect::Bold,
+            |printer| printer.print((x,y), "Health: ")
+        );
+
+        x += 8;
+
+        let curr_health = curr_stats.health.to_string() + "/";
+        let base_health = base_stats.health.to_string();
+        printer.with_color(
+            ColorStyle::new(green, bg),
+            |printer| printer.print((x,y), curr_health.as_ref())
+        );
+
+        x += curr_health.len();
+        printer.with_color(
+            ColorStyle::new(green, bg),
+            |printer| printer.print((x,y), base_health.as_ref())
+        );
     }
 
     fn draw_info(&self, printer: &Printer) {
@@ -84,19 +124,13 @@ impl RogueView {
         printer.print_hline((camera.width+1,self.height/2), self.width-camera.width, "─");
 
         printer.print((camera.width+1, 0), "Player Info:");
-        printer.print_hline((camera.width+1,1), self.width-camera.width, "─");
 
         printer.print((camera.width+1, self.height/2+1), "Target Info");
 
-        self.draw_target_info(Vec2::new(camera.width+1, 2), self.game.player(), printer);
-/*
-        let target = self.game.target();
-
-        if let Some(t) = target {
-            //let ref_e : &Entity = *t;
-            //self.draw_target_info(Vec2::new(camera.width+1, self.height/2+2), t, printer);
+        self.draw_player_info(Vec2::new(camera.width+1, 1), printer);
+        if self.game.active_target() {
+            self.draw_target_info(Vec2::new(camera.width+1, self.height/2+2), printer);
         }
-*/
     }
 
     fn draw_log(&self, printer: &Printer) {
@@ -180,8 +214,6 @@ impl cursive::view::View for RogueView {
             };
         }
         else if let Event::Mouse{offset ,position, event} = event {
-            println!("{:?} {:?} ",  position, event );
-
             let new_event = match event {
                 MouseEvent::Press(button) => input::MouseEvent::Press(
                     match button {
