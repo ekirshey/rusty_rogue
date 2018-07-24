@@ -1,6 +1,6 @@
 extern crate chrono;
 
-pub mod math;
+pub mod utils;
 pub mod player;
 pub mod rogue_view;
 pub mod world;
@@ -11,10 +11,9 @@ pub mod stats;
 pub mod display;
 pub mod log;
 pub mod input;
-pub mod graph;
 
 use std::collections::HashMap;
-use math::Vec2;
+use utils::math::Vec2;
 use player::Player;
 use world::World;
 use camera::Camera;

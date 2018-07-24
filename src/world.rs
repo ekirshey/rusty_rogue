@@ -1,4 +1,4 @@
-use super::graph::*;
+use super::utils::graph::*;
 
 #[derive(Copy, Clone)]
 pub struct Cell {

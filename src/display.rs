@@ -1,4 +1,5 @@
-use super::math::*;
+use super::utils::math::Vec3;
+use super::utils::math::Vec2;
 
 pub struct DrawOutput {
     pub position : Vec2<usize>,

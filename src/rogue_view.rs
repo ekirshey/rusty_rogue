@@ -3,7 +3,7 @@ extern crate cursive;
 use super::player;
 use super::{ Game, GameOptions, Input};
 use super::world::Cell;
-use super::math;
+use super::utils::math;
 use super::input;
 use super::attack::Attackable;
 use super::Entity;

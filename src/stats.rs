@@ -1,4 +1,4 @@
-use math::Vec2;
+use utils::math::Vec2;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Facing {

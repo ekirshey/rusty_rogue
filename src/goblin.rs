@@ -1,5 +1,5 @@
-use super::math::Vec2;
-use super::math::Vec3;
+use super::utils::math::Vec2;
+use super::utils::math::Vec3;
 use super::attack::*;
 use super::stats::*;
 use super::display::*;

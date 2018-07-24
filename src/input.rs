@@ -1,4 +1,4 @@
-use super::math::Vec2;
+use super::utils::math::Vec2;
 
 // Move this stuff to an input module
 #[derive(PartialEq)]

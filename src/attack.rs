@@ -1,4 +1,4 @@
-use super::math::Vec2;
+use super::utils::math::Vec2;
 use super::stats::StatBlock;
 use super::world::World;
 use super::player::Player;

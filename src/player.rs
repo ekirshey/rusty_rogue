@@ -1,6 +1,6 @@
 use std::fmt;
-use super::math::Vec2;
-use super::math::Vec3;
+use super::utils::math::Vec2;
+use super::utils::math::Vec3;
 use super::attack::*;
 use super::display::*;
 use super::stats::*;
