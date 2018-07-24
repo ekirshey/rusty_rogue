@@ -1,5 +1,8 @@
 use super::math::Vec2;
 use super::stats::StatBlock;
+use super::world::World;
+use super::player::Player;
+use super::EntityMap;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ElementalType {
@@ -41,10 +44,12 @@ impl Attack {
 }
 
 pub trait Attackable {
-    fn send_attack(&self) -> Attack;
+    fn update(&self, player : &Player, entities : &EntityMap, world : &World) -> Option<Attack>;
     fn receive_attack(&mut self, attack : &Attack) -> CombatResult; 
-    fn position(&self) -> &Vec2<usize>;
     fn collision(&self, other : Vec2<usize>) -> bool;
+
+    // Getters
+    fn position(&self) -> &Vec2<usize>;
     fn alive(&self) -> bool;
     fn base_stats(&self) -> &StatBlock;
     fn current_stats(&self) -> &StatBlock;

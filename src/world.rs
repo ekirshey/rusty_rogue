@@ -1,3 +1,5 @@
+use super::graph::*;
+
 #[derive(Copy, Clone)]
 pub struct Cell {
     pub x : u32

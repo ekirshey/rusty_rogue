@@ -3,6 +3,9 @@ use super::math::Vec3;
 use super::attack::*;
 use super::stats::*;
 use super::display::*;
+use super::world::World;
+use super::player::Player;
+use super::EntityMap;
 
 pub struct Goblin {
     pos : Vec2<usize>,
@@ -25,10 +28,14 @@ impl Goblin {
 }
 
 impl Attackable for Goblin {
-    fn send_attack(&self) -> Attack {
+    fn update(&self, player : &Player, entities : &EntityMap, world : &World) -> Option<Attack> {
+        // Goblin should probably have some sort of AI object
+        // that generates the actions
+        
+
         let atk_pos = facing_position(self.facing, self.pos);
         let damage = (self.curr_stats.strength * 3)/2;
-        Attack::new(AttackType::Piercing, damage, atk_pos)
+        Some(Attack::new(AttackType::Piercing, damage, atk_pos))
     }
 
     fn receive_attack(&mut self, attack : &Attack) -> CombatResult {

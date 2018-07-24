@@ -68,16 +68,13 @@ impl Player {
         
     }
 
-}
-
-impl Attackable for Player {
-    fn send_attack(&self) -> Attack {
+    pub fn send_attack(&self) -> Attack {
         let atk_pos = facing_position(self.facing, self.pos);
         let damage = (self.curr_stats.strength * 3)/2;
         Attack::new(AttackType::Piercing, damage, atk_pos)
     }
 
-    fn receive_attack(&mut self, attack : &Attack) -> CombatResult {
+    pub fn receive_attack(&mut self, attack : &Attack) -> CombatResult {
         self.curr_stats.health -= attack.damage;
         
         CombatResult {
@@ -87,44 +84,31 @@ impl Attackable for Player {
         }
     }
 
-    fn position(&self) -> &Vec2<usize> {
+    pub fn position(&self) -> &Vec2<usize> {
         &self.pos
     }
 
-    fn collision(&self, other : Vec2<usize>) -> bool {
+    pub fn collision(&self, other : Vec2<usize>) -> bool {
         other == self.pos
     }
 
-    fn alive(&self) -> bool {
+    pub fn alive(&self) -> bool {
         self.curr_stats.health <= 0
     }
 
-    fn base_stats(&self) -> &StatBlock {
+    pub fn base_stats(&self) -> &StatBlock {
         &self.base_stats
     }
 
-    fn current_stats(&self) -> &StatBlock {
+    pub fn current_stats(&self) -> &StatBlock {
         &self.curr_stats
     }
 
-    fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         &self.name
     }
 }
 
-impl Drawable for Player {
-    fn draw(&self) -> DrawOutput {
-        let percent_health : f32 = self.curr_stats.health as f32 /self.base_stats.health as f32;
-        let red = (255.0 * (1.0-percent_health)) as u8;
-        let green = (255.0 *(percent_health)) as u8;
-        DrawOutput {
-            position : self.pos,
-            fg : Vec3::new(red, green, 0),
-            bg : Vec3::new(95,95,95),
-            icon : '@'
-        }
-    }
-}
 
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

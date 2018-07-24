@@ -123,9 +123,9 @@ impl RogueView {
 
         printer.print_hline((camera.width+1,self.height/2), self.width-camera.width, "─");
 
-        printer.print((camera.width+1, 0), "Player Info:");
+        printer.print((camera.width+1, 0), "Player:");
 
-        printer.print((camera.width+1, self.height/2+1), "Target Info");
+        printer.print((camera.width+1, self.height/2+1), "Target:");
 
         self.draw_player_info(Vec2::new(camera.width+1, 1), printer);
         if self.game.active_target() {
@@ -171,13 +171,18 @@ impl cursive::view::View for RogueView {
         }
 
         // draw entities
-        for (_uuid, e) in self.game.entities().iter() {
+        for (uuid, e) in self.game.entities().iter() {
             let display = e.draw();
             let pos = display.position;
             if camera.point_intersects(pos.x as usize, pos.y as usize) {
                 let symbol = display.icon.to_string();
                 let fg = Color::Rgb(display.fg.x,display.fg.y,display.fg.z);
-                let bg = Color::Rgb(display.bg.x,display.bg.y,display.bg.z);
+                let mut bg = Color::Rgb(display.bg.x,display.bg.y,display.bg.z);
+                if let Some(target) = self.game.target {
+                    if target == *uuid {
+                        bg = Color::Rgb(50,50,50);
+                    }
+                }
                 printer.with_color(
                     ColorStyle::new(fg, bg),
                     |printer| printer.print((pos.x - camera.x, pos.y - camera.y), &symbol),

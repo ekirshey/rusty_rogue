@@ -11,6 +11,7 @@ pub mod stats;
 pub mod display;
 pub mod log;
 pub mod input;
+pub mod graph;
 
 use std::collections::HashMap;
 use math::Vec2;
@@ -50,6 +51,8 @@ impl GameOptions {
 pub trait Entity : Attackable + Drawable {}
 impl<T> Entity for T where T: Attackable + Drawable {}
 
+type EntityMap = HashMap<u32, Box<Entity>>;
+
 pub struct Game {
     player : Player,
     world : World,
@@ -58,7 +61,7 @@ pub struct Game {
     log : Log,
     uuid : u32,
     target : Option<u32>,
-    entities : HashMap<u32, Box<Entity>>
+    entities : EntityMap
 }
 
 impl Game {
@@ -69,7 +72,7 @@ impl Game {
                      );
 
         let mut uuid = 0;
-        let mut m  : HashMap<u32, Box<Entity>> = HashMap::new();
+        let mut m  : EntityMap = HashMap::new();
         for i in 0..5 {
             let bc = Box::new(Goblin::new(Vec2::new(5+i,5+i)));
             m.insert(uuid, bc);
@@ -143,7 +146,7 @@ impl Game {
         &self.camera
     }
 
-    pub fn entities(&self) -> &HashMap<u32, Box<Entity>> {
+    pub fn entities(&self) -> &EntityMap {
         &self.entities
     }
 
@@ -188,7 +191,7 @@ impl Game {
         None
     }
  
-    //
+    /////////////////////////////////////////////////
 
     fn process_move(&mut self, x_dir : i32, y_dir : i32) {
         let mut lcl_x = x_dir;
