@@ -1,8 +1,8 @@
 use super::chrono::prelude::*;
 
 use super::Player;
-use super::attack::Attackable;
-use super::attack::CombatResult;
+use entity::Attackable;
+use entity::CombatResult;
 
 // Change it to hold a struct type so I can style the messages.
 // Like color the "killed" message red

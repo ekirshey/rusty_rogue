@@ -1,8 +1,9 @@
-use super::utils::math::Vec2;
-use super::stats::StatBlock;
-use super::world::World;
-use super::player::Player;
-use super::EntityMap;
+use utils::Vec2;
+use entity::StatBlock;
+use entity::EntityMap;
+
+use world::World;
+use rusty_rogue::Player;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ElementalType {

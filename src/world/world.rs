@@ -1,5 +1,5 @@
-use super::utils::graph::*;
-use super::dungeon::Dungeon;
+use utils::Graph;
+use world::Dungeon;
 
 pub enum WorldNode {
     DungeonNode(Dungeon)

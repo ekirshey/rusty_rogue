@@ -1,9 +1,7 @@
 use std::fmt;
-use super::utils::math::Vec2;
-use super::utils::math::Vec3;
-use super::attack::*;
-use super::display::*;
-use super::stats::*;
+use utils::Vec2;
+use utils::Vec3;
+use entity::{StatBlock, Facing, Attack, CombatResult, AttackType};
 
 #[derive(Debug, Copy, Clone)]
 pub enum Class {
@@ -69,7 +67,7 @@ impl Player {
     }
 
     pub fn send_attack(&self) -> Attack {
-        let atk_pos = facing_position(self.facing, self.pos);
+        let atk_pos = self.facing.position(self.pos);
         let damage = (self.curr_stats.strength * 3)/2;
         Attack::new(AttackType::Piercing, damage, atk_pos)
     }

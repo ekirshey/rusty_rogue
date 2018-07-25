@@ -1,27 +1,26 @@
 extern crate chrono;
 
 pub mod utils;
-pub mod player;
+pub mod entity;
+
+mod player;
 pub mod rogue_view;
-pub mod world;
-pub mod dungeon;
 pub mod goblin;
-pub mod attack;
-pub mod stats;
-pub mod display;
 pub mod log;
 pub mod input;
 
-use std::collections::HashMap;
-use utils::math::Vec2;
-use player::Player;
+use utils::Vec2;
+use entity::StatBlock;
+use entity::EntityMap;
 use world::World;
 use goblin::Goblin;
-use attack::*;
-use display::Drawable;
 use log::Log;
 use input::{Input, MouseEvent, MouseButton};
-use stats::StatBlock;
+use std::collections::HashMap;
+
+
+// Change at some point?
+pub use self::player::Player;
 
 pub struct GameOptions {
     width : usize,
@@ -44,12 +43,6 @@ impl GameOptions {
         }
     }
 }
-
-// Create Entity concept
-pub trait Entity : Attackable + Drawable {}
-impl<T> Entity for T where T: Attackable + Drawable {}
-
-type EntityMap = HashMap<u32, Box<Entity>>;
 
 pub struct Game {
     player : Player,

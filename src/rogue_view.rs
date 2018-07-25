@@ -2,16 +2,15 @@ extern crate cursive;
 
 use super::player;
 use super::{ Game, GameOptions, Input};
-use super::utils::math;
+use utils;
 use super::input;
-use super::attack::Attackable;
-use super::Entity;
-use super::world::*;
+use entity::{Entity, Attackable};
+use world::World;
 use super::dungeon::*;
 
 use self::cursive::Printer;
 use self::cursive::theme::{Color, ColorStyle, Effect};
-use self::cursive::vec::Vec2;
+use self::cursive::vec;
 use self::cursive::direction::Direction;
 use self::cursive::event::{Event, MouseEvent, MouseButton, EventResult, Key};
 
@@ -22,7 +21,7 @@ pub struct RogueView {
 }
 
 impl RogueView {
-    pub fn new(size : Vec2, name : String, class : player::Class) -> RogueView {
+    pub fn new(size : vec::Vec2, name : String, class : player::Class) -> RogueView {
         let options = GameOptions::new(60, 30, name, class);
 
         RogueView {
@@ -36,7 +35,7 @@ impl RogueView {
         self.game.active_loot()
     }
 
-    fn draw_player_info(&self, start : Vec2, printer: &Printer) {
+    fn draw_player_info(&self, start : vec::Vec2, printer: &Printer) {
         let player = self.game.player();
         let curr_stats = player.current_stats();
         let base_stats = player.base_stats();
@@ -76,7 +75,7 @@ impl RogueView {
         );
     }
 
-    fn draw_target_info(&self, start : Vec2, printer: &Printer) {
+    fn draw_target_info(&self, start : vec::Vec2, printer: &Printer) {
         let curr_stats = self.game.target_current_stats().unwrap();
         let base_stats = self.game.target_base_stats().unwrap();
         let name = self.game.target_name().unwrap();
@@ -127,9 +126,9 @@ impl RogueView {
 
         printer.print((vp_width+1, self.height/2+1), "Target:");
 
-        self.draw_player_info(Vec2::new(vp_width+1, 1), printer);
+        self.draw_player_info(vec::Vec2::new(vp_width+1, 1), printer);
         if self.game.active_target() {
-            self.draw_target_info(Vec2::new(vp_width+1, self.height/2+2), printer);
+            self.draw_target_info(vec::Vec2::new(vp_width+1, self.height/2+2), printer);
         }
     }
 
@@ -256,8 +255,8 @@ impl cursive::view::View for RogueView {
             };
 
             input = Input::Mouse{
-                offset : math::Vec2::new(offset.x,offset.y),
-                position : math::Vec2::new(position.x,position.y),
+                offset : utils::Vec2::new(offset.x,offset.y),
+                position : utils::Vec2::new(position.x,position.y),
                 event : new_event,
             };
         }
@@ -270,8 +269,8 @@ impl cursive::view::View for RogueView {
         EventResult::Ignored
     }
 
-    fn required_size(&mut self, _: Vec2) -> Vec2 {
-        Vec2 {
+    fn required_size(&mut self, _: vec::Vec2) -> vec::Vec2 {
+        vec::Vec2 {
             x : self.width,
             y : self.height
         }

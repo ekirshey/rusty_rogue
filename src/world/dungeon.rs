@@ -1,6 +1,6 @@
-use super::utils::graph::Graph;
-use super::utils::math::Vec2;
-use super::Entity;
+use utils::Graph;
+use utils::Vec2;
+use entity::Entity;
 
 pub enum CellType {
     Wall,

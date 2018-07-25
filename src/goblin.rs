@@ -1,11 +1,10 @@
-use super::utils::math::Vec2;
-use super::utils::math::Vec3;
-use super::attack::*;
-use super::stats::*;
-use super::display::*;
-use super::world::World;
+use utils::Vec2;
+use utils::Vec3;
+use world::World;
+use entity::{Attackable, Attack, AttackType, CombatResult, 
+             StatBlock, Facing, Drawable, DrawOutput, EntityMap};
 use super::player::Player;
-use super::EntityMap;
+
 
 pub struct Goblin {
     pos : Vec2<usize>,
@@ -32,8 +31,7 @@ impl Attackable for Goblin {
         // Goblin should probably have some sort of AI object
         // that generates the actions
         
-
-        let atk_pos = facing_position(self.facing, self.pos);
+        let atk_pos = self.facing.position(self.pos);
         let damage = (self.curr_stats.strength * 3)/2;
         Some(Attack::new(AttackType::Piercing, damage, atk_pos))
     }
