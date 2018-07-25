@@ -6,4 +6,4 @@ use std::collections::HashMap;
 pub trait Entity : Attackable + Drawable {}
 impl<T> Entity for T where T: Attackable + Drawable {}
 
-pub type EntityMap = HashMap<u32, Box<Entity>>;
+pub type EntityMap = HashMap<usize, Box<Entity>>;

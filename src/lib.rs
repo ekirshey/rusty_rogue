@@ -14,13 +14,12 @@ use utils::Vec2;
 use entity::StatBlock;
 use entity::EntityMap;
 use world::World;
-use goblin::Goblin;
-use log::Log;
 use input::{Input, MouseEvent, MouseButton};
-use std::collections::HashMap;
 
 // Change at some point?
 pub use player::Player;
+pub use goblin::Goblin;
+pub use log::Log;
 
 pub struct GameOptions {
     width : usize,
@@ -50,55 +49,31 @@ pub struct Game {
     viewport : Vec2<usize>,
     step : bool,
     log : Log,
-    uuid : u32,
-    target : Option<u32>,
-    entities : EntityMap
+    uuid : u32
 }
 
 impl Game {
     pub fn new(options : GameOptions) -> Self {
+        let world = World::new();
         let player = player::Player::new(
                         options.player_name, 
-                        Vec2::new(0,0)
+                        world.starting_position()
                      );
 
         let mut uuid = 0;
-        let mut m  : EntityMap = HashMap::new();
-        for i in 0..5 {
-            let bc = Box::new(Goblin::new(Vec2::new(5+i,5+i)));
-            m.insert(uuid, bc);
-            uuid += 1;
-        }
 
         Game {
             player,
-            world : World::new(options.width, options.height),
+            world,
             viewport : Vec2::new(50, 15),
             step : false,
             log : Log::new(20),
-            uuid,
-            target : None,
-            entities : m
+            uuid
         }
     }
 
     fn step(&mut self) {
-        let mut rem = Vec::new();
-
-        for (uuid, m) in &mut self.entities {
-            if !m.alive() {
-                rem.push(*uuid);
-                if let Some(target_id) = self.target {
-                    if target_id == *uuid {
-                        self.target = None;
-                    }
-                }
-            }
-        }
-        
-        for uuid in &rem {
-            self.entities.remove(uuid);
-        }
+        self.world.step(&mut self.player);
     }
 
     pub fn handle_input(&mut self, input : &Input) {    
@@ -127,16 +102,16 @@ impl Game {
         &self.player
     }
 
+    pub fn get_entities(&self) -> Option<&EntityMap> {
+        self.world.get_entities()
+    }
+
     pub fn viewport_width(&self) -> usize {
         self.viewport.x
     }
 
     pub fn viewport_height(&self) -> usize {
         self.viewport.y
-    }
-
-    pub fn entities(&self) -> &EntityMap {
-        &self.entities
     }
 
     pub fn get_log_messages(&self, msg_count : usize) -> &[String] {
@@ -152,34 +127,42 @@ impl Game {
     // Possibly because of lifetimes? Either way I'm making wrappers
     // that take a uuid
     pub fn active_target(&self) -> bool {
-        if let Some(uuid) = self.target {
+        if let Some(uuid) = self.player.target() {
             return true;
         }
-
         false
     }
 
     pub fn target_name(&self) -> Option<&str> {
-        if let Some(uuid) = self.target {
-            return Some(self.entities[&uuid].name());
+        if let Some(uuid) = self.player.target() {
+            let result = self.get_entities();
+            if let Some(entities) = result {
+                return Some(entities[&uuid].name());
+            }
         }
         None
     }
 
     pub fn target_current_stats(&self) -> Option<&StatBlock> {
-        if let Some(uuid) = self.target {
-            return Some(self.entities[&uuid].current_stats());
+        if let Some(uuid) = self.player.target() {
+            let result = self.get_entities();
+            if let Some(entities) = result {
+                return Some(entities[&uuid].current_stats());
+            }
         }
         None
     }
 
     pub fn target_base_stats(&self) -> Option<&StatBlock> {
-        if let Some(uuid) = self.target {
-            return Some(self.entities[&uuid].base_stats());
+        if let Some(uuid) = self.player.target() {
+            let result = self.get_entities();
+            if let Some(entities) = result {
+                return Some(entities[&uuid].base_stats());
+            }
         }
         None
     }
- 
+    
     /////////////////////////////////////////////////
 
     fn process_move(&mut self, x_dir : i32, y_dir : i32) {
@@ -201,26 +184,8 @@ impl Game {
                                 (pos.y as i32 + lcl_y) as usize);
         }
 
-        let mut blocked = false;
-        for (uuid, mut m) in &mut self.entities {
-            if m.collision(new_pos) {
-                let attack = self.player.send_attack();
-                let result = m.receive_attack(&attack);
-                self.log.log_combat(&self.player, &result);
-                self.target = Some(*uuid);
-                if result.target_alive {
-                    blocked = true;
-                }
-            }
-        }
-/*
-        if  !blocked &&
-            new_pos.x < self.world.width() && 
-            new_pos.y < self.world.height()
-        {
-            self.player.move_player(lcl_x, lcl_y);
-        }
-*/
+        self.world.handle_player_input(&mut self.player, new_pos, &mut self.log);
+
         self.step = true;
     }
 
@@ -230,9 +195,12 @@ impl Game {
 
     fn process_mouse(&mut self, position : Vec2<usize>, event : &input::MouseEvent)  {
         if let MouseEvent::Press(MouseButton::Left) = event {
-            for (uuid, m) in &self.entities {
-                if m.collision(position) {
-                    self.target = Some(*uuid);
+            let result = self.world.get_entities();
+            if let Some(entities) = result {
+                for (uuid, m) in entities {
+                    if m.collision(position) {
+                        self.player.set_target(*uuid);
+                    }
                 }
             }
         }

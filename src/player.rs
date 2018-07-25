@@ -15,7 +15,8 @@ pub struct Player {
     pos : Vec2<usize>,
     base_stats : StatBlock,
     curr_stats : StatBlock,
-    facing : Facing
+    facing : Facing,
+    target : Option<usize>
 }
 
 impl Player {
@@ -25,7 +26,8 @@ impl Player {
             pos,
             base_stats : StatBlock::new(10, 10, 10),
             curr_stats : StatBlock::new(10, 10, 10),
-            facing : Facing::East
+            facing : Facing::East,
+            target : None
         }
     }
 
@@ -34,36 +36,27 @@ impl Player {
         self.pos.y = y;
     }
 
-    pub fn move_player(&mut self, x_dir : i32, y_dir : i32) {
-        let mut lcl_x = x_dir;
-        let mut lcl_y = y_dir;
-        if (self.pos.x as i32 + x_dir) < 0 {
-            lcl_x = 0;
-        }
+    pub fn move_player(&mut self, new_pos : Vec2<usize>) {
+        let x_dir = new_pos.x as i32 - self.pos.x as i32;
+        let y_dir = new_pos.y as i32 - self.pos.y as i32;
 
-        if (self.pos.y as i32 + y_dir) < 0 {
-            lcl_y = 0;
-        }
-
-        self.pos.x = (self.pos.x as i32 + lcl_x) as usize;
-        self.pos.y = (self.pos.y as i32 + lcl_y) as usize;
-
-        if lcl_x > 0 {
+        if x_dir > 0 {
             self.facing = Facing::East;
         }
 
-        if lcl_x < 0 {
+        if x_dir < 0 {
             self.facing = Facing::West;
         }
 
-        if lcl_y > 0 {
+        if y_dir > 0 {
             self.facing = Facing::North;
         }
         
-        if lcl_y < 0 {
+        if y_dir < 0 {
             self.facing = Facing::South;
         }
-        
+
+        self.pos = new_pos;
     }
 
     pub fn send_attack(&self) -> Attack {
@@ -104,6 +97,18 @@ impl Player {
 
     pub fn name(&self) -> &str {
         &self.name
+    }
+
+    pub fn target(&self) -> Option<usize> {
+        self.target
+    }
+
+    pub fn set_target(&mut self, uuid : usize) {
+        self.target = Some(uuid);
+    }
+
+    pub fn clear_target(&mut self) {
+        self.target = None;
     }
 }
 

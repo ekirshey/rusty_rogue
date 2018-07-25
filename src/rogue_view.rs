@@ -17,17 +17,22 @@ pub struct RogueView {
     game : Game,
     width : usize,
     height : usize,
+    offset : utils::Vec2<usize>
 }
 
 impl RogueView {
     pub fn new(size : vec::Vec2, name : String, class : player::Class) -> RogueView {
         let options = GameOptions::new(60, 30, name, class);
 
-        RogueView {
+        let mut rogueview = RogueView {
             game : Game::new(options),
             width : size.x,
-            height : size.y
-        }
+            height : size.y,
+            offset : utils::Vec2::new(0,0)
+        };
+        rogueview.update_mouse_offset();
+
+        rogueview
     }
 
     pub fn active_loot(&self) -> String {
@@ -74,6 +79,7 @@ impl RogueView {
         );
     }
 
+
     fn draw_target_info(&self, start : vec::Vec2, printer: &Printer) {
         let curr_stats = self.game.target_current_stats().unwrap();
         let base_stats = self.game.target_base_stats().unwrap();
@@ -114,6 +120,7 @@ impl RogueView {
         );
     }
 
+
     fn draw_info(&self, printer: &Printer) {
         let vp_width = self.game.viewport_width();
 
@@ -129,6 +136,7 @@ impl RogueView {
         if self.game.active_target() {
             self.draw_target_info(vec::Vec2::new(vp_width+1, self.height/2+2), printer);
         }
+
     }
 
     fn draw_log(&self, printer: &Printer) {
@@ -147,6 +155,7 @@ impl RogueView {
     }
 
     fn draw_dungeon_room(&self, dungeon : &Dungeon, printer: &Printer) {
+        let player = self.game.player();
         let vp_width = self.game.viewport_width();
         let vp_height = self.game.viewport_height();
 
@@ -161,48 +170,69 @@ impl RogueView {
 
             let symbol = cell.id.value().to_string();
 
-            printer.print((x_offset + x,y_offset + y), &symbol);
+            printer.print((self.offset.x + x,self.offset.y + y), &symbol);
         } 
-    }
 
-}
-
-impl cursive::view::View for RogueView {
-    fn draw(&self, printer: &Printer) {
-        let world = self.game.world();
-        let player = self.game.player();
-
-        match world.active_node() {
-            WorldNode::DungeonNode(dungeon) => self.draw_dungeon_room(dungeon, printer),
-            _ => println!("No draw for this not type yet"),
-        }   
-
-        /*
         // draw entities
-        for (uuid, e) in self.game.entities().iter() {
-            let display = e.draw();
-            let pos = display.position;
-            if camera.point_intersects(pos.x as usize, pos.y as usize) {
+        let result = self.game.get_entities();
+        if let Some(entities) = result {
+            for (uuid, e) in entities.iter() {
+                let display = e.draw();
+                let pos = display.position;
+
                 let symbol = display.icon.to_string();
                 let fg = Color::Rgb(display.fg.x,display.fg.y,display.fg.z);
                 let mut bg = Color::Rgb(display.bg.x,display.bg.y,display.bg.z);
-                if let Some(target) = self.game.target {
+                let result = self.game.player().target();
+                if let Some(target) = result {
                     if target == *uuid {
                         bg = Color::Rgb(50,50,50);
                     }
                 }
                 printer.with_color(
                     ColorStyle::new(fg, bg),
-                    |printer| printer.print((pos.x - camera.x, pos.y - camera.y), &symbol),
+                    |printer| printer.print(
+                                    (self.offset.x + pos.x, self.offset.y + pos.y), &symbol),
                 );
+                
             }
         }
 
+        // Draw Player
         let pos = player.position();
-        let pos_x = pos.x - camera.x;
-        let pos_y = pos.y - camera.y;
+        let pos_x = self.offset.x + pos.x;
+        let pos_y = self.offset.y + pos.y;
         printer.print((pos_x, pos_y), "@");
-        */
+    }
+
+    fn update_mouse_offset(&mut self) {
+        // Calculate offset
+        let world = self.game.world();
+
+        match world.active_node() {
+            WorldNode::DungeonNode(ref dungeon) => {
+                        let room = dungeon.active_room();
+                        let vp_width = self.game.viewport_width();
+                        let vp_height = self.game.viewport_height();
+
+                        let x_offset = vp_width/2 - room.width()/2;
+                        let y_offset = vp_height/2 - room.height()/2;
+                        self.offset = utils::Vec2::new(x_offset, y_offset);
+            }
+            _ => println!("No draw for this not type yet"),
+        }   
+    }
+}
+
+impl cursive::view::View for RogueView {
+    fn draw(&self, printer: &Printer) {
+        let world = self.game.world();
+
+        match world.active_node() {
+            WorldNode::DungeonNode(ref dungeon) => self.draw_dungeon_room(dungeon, printer),
+            _ => println!("No draw for this not type yet"),
+        }   
+
         self.draw_log(printer);
         self.draw_info(printer);
 
@@ -216,8 +246,10 @@ impl cursive::view::View for RogueView {
         //else if let Event::Char(key) = event {
         //    input = Input::Key(key);
         //}
+        
         let mut input : input::Input = Input::Unknown;
-        if let Event::Key(key) = event {      
+        if let Event::Key(key) = event {     
+            self.update_mouse_offset(); 
             input = match key {
                 Key::Right => Input::Right,
                 Key::Left => Input::Left,
@@ -255,7 +287,8 @@ impl cursive::view::View for RogueView {
 
             input = Input::Mouse{
                 offset : utils::Vec2::new(offset.x,offset.y),
-                position : utils::Vec2::new(position.x,position.y),
+                position : utils::Vec2::new(position.x - self.offset.x,
+                                            position.y - self.offset.y),
                 event : new_event,
             };
         }

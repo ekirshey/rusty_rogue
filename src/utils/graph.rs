@@ -62,4 +62,8 @@ impl<T> Graph<T> {
     pub fn get(&self, node : NodeId) -> Option<&Node<T>> {
         self.nodes.get(node)
     }
+
+    pub fn get_mut(&mut self, node : NodeId) -> Option<&mut Node<T>> {
+        self.nodes.get_mut(node)
+    }
 }
