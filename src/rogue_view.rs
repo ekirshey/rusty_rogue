@@ -5,8 +5,7 @@ use super::{ Game, GameOptions, Input};
 use utils;
 use super::input;
 use entity::{Entity, Attackable};
-use world::World;
-use super::dungeon::*;
+use world::{World, WorldNode, Dungeon, Room};
 
 use self::cursive::Printer;
 use self::cursive::theme::{Color, ColorStyle, Effect};

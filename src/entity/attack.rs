@@ -3,7 +3,7 @@ use entity::StatBlock;
 use entity::EntityMap;
 
 use world::World;
-use rusty_rogue::Player;
+use player::Player;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ElementalType {

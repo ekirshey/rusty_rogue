@@ -1,9 +1,10 @@
 extern crate chrono;
 
-pub mod utils;
-pub mod entity;
+mod utils;
+mod entity;
+mod world;
 
-mod player;
+pub mod player;
 pub mod rogue_view;
 pub mod goblin;
 pub mod log;
@@ -18,9 +19,8 @@ use log::Log;
 use input::{Input, MouseEvent, MouseButton};
 use std::collections::HashMap;
 
-
 // Change at some point?
-pub use self::player::Player;
+pub use player::Player;
 
 pub struct GameOptions {
     width : usize,
