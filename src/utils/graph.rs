@@ -11,13 +11,13 @@ pub struct Graph<T> {
 }
 
 impl<T> Graph<T> {
-    fn new() -> Graph<T> {
+    pub fn new() -> Graph<T> {
         Graph {
             nodes : Vec::new()
         }
     }
 
-    fn new_node(&mut self, data: T) -> NodeId {
+    pub fn new_node(&mut self, data: T) -> NodeId {
         let next_index = self.nodes.len();
 
         self.nodes.push(
@@ -29,7 +29,7 @@ impl<T> Graph<T> {
         next_index
     }
 
-    fn add_neighbor(&mut self, node : NodeId, neighbor : NodeId) -> Result<(), &str> {
+    pub fn add_neighbor(&mut self, node : NodeId, neighbor : NodeId) -> Result<(), &str> {
         if node != neighbor && 
            node < self.nodes.len() && 
            neighbor < self.nodes.len() 
@@ -41,7 +41,7 @@ impl<T> Graph<T> {
         Err("Invalid NodeId")
     }
 
-    fn add_new_neighbor(&mut self, node : NodeId, data : T) -> Result<NodeId, &str> {
+    pub fn add_new_neighbor(&mut self, node : NodeId, data : T) -> Result<NodeId, &str> {
         if node < self.nodes.len() {
             let neighbor = self.new_node(data);
             self.nodes[node].neighbors.push(neighbor);
@@ -51,11 +51,15 @@ impl<T> Graph<T> {
         Err("Invalid NodeId")
     }
 
-    fn get_neighbors(&self, node : NodeId) -> Result<&Vec<NodeId>, &str> {
+    pub fn get_neighbors(&self, node : NodeId) -> Option<&Vec<NodeId>> {
         if node < self.nodes.len() {
-            &self.nodes[node].neighbors;
+            return Some(&self.nodes[node].neighbors);
         }
 
-        Err("Invalid NodeId")
+        None
+    }
+
+    pub fn get(&self, node : NodeId) -> Option<&Node<T>> {
+        self.nodes.get(node)
     }
 }

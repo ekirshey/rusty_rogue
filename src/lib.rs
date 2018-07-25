@@ -4,8 +4,8 @@ pub mod utils;
 pub mod player;
 pub mod rogue_view;
 pub mod world;
+pub mod dungeon;
 pub mod goblin;
-pub mod camera;
 pub mod attack;
 pub mod stats;
 pub mod display;
@@ -16,7 +16,6 @@ use std::collections::HashMap;
 use utils::math::Vec2;
 use player::Player;
 use world::World;
-use camera::Camera;
 use goblin::Goblin;
 use attack::*;
 use display::Drawable;
@@ -55,7 +54,7 @@ type EntityMap = HashMap<u32, Box<Entity>>;
 pub struct Game {
     player : Player,
     world : World,
-    camera : Camera,
+    viewport : Vec2<usize>,
     step : bool,
     log : Log,
     uuid : u32,
@@ -81,7 +80,7 @@ impl Game {
         Game {
             player,
             world : World::new(options.width, options.height),
-            camera : Camera::new(),
+            viewport : Vec2::new(50, 15),
             step : false,
             log : Log::new(20),
             uuid,
@@ -119,15 +118,9 @@ impl Game {
             Input::Mouse{offset, position, event} => self.process_mouse(*position, event),
             _ => {}
         }
-        
-        // Update the camera
-        {
-            let pos = self.player.position();
-            self.camera.move_camera(pos.x, pos.y, self.world.width(), self.world.height());
-        }
 
         // Player moved/attacked so update world
-        if self.step {
+        if self.step {  // Only certain input events trigger a step
             self.step();
             self.step = false;
         }
@@ -141,8 +134,12 @@ impl Game {
         &self.player
     }
 
-    pub fn camera(&self) -> &Camera {
-        &self.camera
+    pub fn viewport_width(&self) -> usize {
+        self.viewport.x
+    }
+
+    pub fn viewport_height(&self) -> usize {
+        self.viewport.y
     }
 
     pub fn entities(&self) -> &EntityMap {
@@ -223,14 +220,14 @@ impl Game {
                 }
             }
         }
-
+/*
         if  !blocked &&
             new_pos.x < self.world.width() && 
             new_pos.y < self.world.height()
         {
             self.player.move_player(lcl_x, lcl_y);
         }
-
+*/
         self.step = true;
     }
 
