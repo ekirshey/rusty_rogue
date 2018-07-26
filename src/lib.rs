@@ -48,8 +48,7 @@ pub struct Game {
     world : World,
     viewport : Vec2<usize>,
     step : bool,
-    log : Log,
-    uuid : u32
+    log : Log
 }
 
 impl Game {
@@ -60,15 +59,12 @@ impl Game {
                         world.starting_position()
                      );
 
-        let mut uuid = 0;
-
         Game {
             player,
             world,
-            viewport : Vec2::new(50, 15),
+            viewport : Vec2::new(60, 20),
             step : false,
-            log : Log::new(20),
-            uuid
+            log : Log::new(20)
         }
     }
 
