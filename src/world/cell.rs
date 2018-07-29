@@ -18,6 +18,9 @@ pub enum CellType {
 }
 
 impl CellType {
+    // Maybe move this out into some sort of "colorizer" object
+    // that takes in the cell type and the dungeon "theme" to 
+    // determine what the appropraite color should be
     pub fn value(&self) -> CellDisplay {
         match *self {
             CellType::Wall => CellDisplay {

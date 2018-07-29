@@ -29,7 +29,7 @@ impl RogueView {
             height : size.y,
             offset : utils::Vec2::new(0,0)
         };
-        rogueview.update_mouse_offset();
+        rogueview.update_room_offset();
 
         rogueview
     }
@@ -160,6 +160,8 @@ impl RogueView {
 
         let room = dungeon.active_room();
 
+        printer.print((0,0), &dungeon.active_room_id().to_string());
+
         for ( i, cell) in room.tiles().iter().enumerate() {
             let x = i % room.width();
             let y = i / room.width();
@@ -208,13 +210,14 @@ impl RogueView {
         printer.print((pos_x, pos_y), "@");
     }
 
-    fn update_mouse_offset(&mut self) {
+    fn update_room_offset(&mut self) {
         // Calculate offset
         let world = self.game.world();
 
         match world.active_node() {
             WorldNode::DungeonNode(ref dungeon) => {
                         let room = dungeon.active_room();
+                        
                         let vp_width = self.game.viewport_width();
                         let vp_height = self.game.viewport_height();
 
@@ -283,17 +286,23 @@ impl cursive::view::View for RogueView {
                 MouseEvent::WheelDown => input::MouseEvent::WheelUp,
             };
 
+            let mut mouse_position = utils::Vec2::new(position.x, position.y);
+            if position.x >= self.offset.x {
+                mouse_position.x -= self.offset.x;
+            }
+            if position.y >= self.offset.y {
+                mouse_position.y -= self.offset.y;
+            }
             input = Input::Mouse{
                 offset : utils::Vec2::new(offset.x,offset.y),
-                position : utils::Vec2::new(position.x - self.offset.x,
-                                            position.y - self.offset.y),
+                position : mouse_position,
                 event : new_event,
             };
         }
 
         if input != Input::Unknown {
             self.game.handle_input(&input);
-            self.update_mouse_offset();
+            self.update_room_offset();
             return EventResult::Consumed(None);
         }
 

@@ -37,6 +37,12 @@ impl Direction {
         }        
     }
 
+    pub fn rotate_cw_n(&mut self, n : usize) {
+        for i in 0..n {
+            self.rotate_cw();
+        }
+    }
+
     pub fn rotate_ccw(&mut self) {
         match *self {
             Direction::North => *self = Direction::West,

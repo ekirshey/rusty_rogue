@@ -2,7 +2,7 @@ extern crate rand;
 
 use utils::Vec2;
 use world::{Cell, CellType};
-use entity::{EntityMap};
+use entity::{EntityMap, Entity};
 use player::Player;
 use log::Log;
 use world::Direction;
@@ -18,12 +18,23 @@ struct Entrance {
     pub direction : Direction
 }
 
+pub struct RoomProperties {
+    // theme
+    // "Difficulty" 
+    //// possible monsters
+    //// amount of monsters
+}
+
 pub struct Room {
     size : Vec2<usize>,
     init_pos : Vec2<usize>,
     tiles : Vec<Cell>,
     entrances : Vec<Entrance>,
     entities : EntityMap
+}
+
+fn test_create_goblin() -> Box<Entity> {
+    Box::new(Goblin::new(Vec2::new(5,5)))
 }
 
 impl Room {
@@ -43,11 +54,30 @@ impl Room {
         let mut uuid = 0;
 
         let mut entities : EntityMap = HashMap::new();
-        for i in 0..4 {
-            let bc = Box::new(Goblin::new(Vec2::new(5+i,5+i)));
+        // Max range should be based on area I think
+        let num_gobbos = rand::thread_rng().gen_range(0, 5);
+        for i in 0..num_gobbos {
+            let mut pos = Vec2::new(rand::thread_rng().gen_range(2, size.x-1),
+                                rand::thread_rng().gen_range(2, size.y-1));
+            
+            // Might be better to just generate them all then shift them around?
+            let mut stop = false;
+            while !stop {
+                stop = true;
+                for (_, e) in &entities {
+                    if *e.position() == pos {
+                        pos = Vec2::new(rand::thread_rng().gen_range(2, size.x-1),
+                                        rand::thread_rng().gen_range(2, size.y-1));    
+                        stop = false; 
+                        break;
+                    }
+                }
+            }
+
+            let bc = Box::new(Goblin::new(pos));
             entities.insert(uuid, bc);
             uuid += 1;
-        }
+        }  
 
         Room {
             size,
