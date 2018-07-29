@@ -8,4 +8,4 @@ pub use self::world::{World, WorldNode};
 pub use self::direction::Direction;
 pub use self::dungeon::Dungeon;
 pub use self::room::Room;
-pub use self::cell::{Cell, CellType};
+pub use self::cell::{Cell, CellType, CellDisplay};

@@ -69,10 +69,11 @@ impl<'a> DungeonGrid<'a> {
     }
 
     fn build_room(&mut self, location : Vec2<usize>) {
+
         if self.room_ct == self.num_rooms ||
-           self.get_cell(location).has_room ||
            location.x >= self.size.x || 
-           location.y >= self.size.y 
+           location.y >= self.size.y ||
+           self.get_cell(location).has_room 
         {
             return;
         }
@@ -119,7 +120,10 @@ impl<'a> DungeonGrid<'a> {
             while !stop {
                 let res = direction.try_apply(location);
                 if let Some(next_cell) = res {
-                    if self.get_cell(next_cell).has_room {
+                    if next_cell.x < self.size.x &&
+                       next_cell.y < self.size.y &&
+                       self.get_cell(next_cell).has_room 
+                    {
                         let neighbor = self.populate_graph(next_cell);
                         self.graph.add_neighbor(id, neighbor).unwrap();
                         
@@ -147,6 +151,18 @@ impl<'a> DungeonGrid<'a> {
     }
 }
 
+// RNG properties
+pub struct DungeonProperties {
+    min_grid_size : Vec2<usize>,
+    max_grid_size : Vec2<usize>,
+    min_room_size : Vec2<usize>,
+    max_room_size : Vec2<usize>,
+    min_depth : usize,
+    max_depth : usize,
+    min_rooms : usize,
+    max_rooms : usize
+}
+
 pub struct Dungeon {
     depth : usize,
     active_floor : usize,
@@ -158,6 +174,7 @@ pub struct Dungeon {
 
 impl Dungeon {
     pub fn new(depth : usize) -> Dungeon {
+
         let start = Vec2::new( rand::thread_rng().gen_range(0, 10),
                             rand::thread_rng().gen_range(0, 10));
 
@@ -246,7 +263,6 @@ impl Dungeon {
         
 
         if let CellType::Exit{node_id, exiting_direction} = cell_type {
-            println!("exiting to {}", node_id );
             let mut entering_direction = exiting_direction;
             entering_direction.invert();
             

@@ -164,9 +164,16 @@ impl RogueView {
             let x = i % room.width();
             let y = i / room.width();
 
-            let symbol = cell.id.value().to_string();
+            let display = cell.id.value();
+            let symbol = display.icon.to_string();
+            let fg = Color::Rgb( display.fg.x, display.fg.y, display.fg.z );
+            let bg = Color::Rgb( display.bg.x, display.bg.y, display.bg.z );
 
-            printer.print((self.offset.x + x,self.offset.y + y), &symbol);
+            printer.with_color(
+                ColorStyle::new(fg, bg),
+                |printer| printer.print(
+                                (self.offset.x + x, self.offset.y + y), &symbol),
+            );
         } 
 
         // draw entities
@@ -177,8 +184,8 @@ impl RogueView {
                 let pos = display.position;
 
                 let symbol = display.icon.to_string();
-                let fg = Color::Rgb(display.fg.x,display.fg.y,display.fg.z);
-                let mut bg = Color::Rgb(display.bg.x,display.bg.y,display.bg.z);
+                let fg = Color::Rgb( display.fg.x, display.fg.y, display.fg.z );
+                let mut bg = Color::Rgb( display.bg.x, display.bg.y, display.bg.z );
                 let result = self.game.player().target();
                 if let Some(target) = result {
                     if target == *uuid {

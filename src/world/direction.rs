@@ -61,7 +61,7 @@ impl Direction {
             },
             Direction::West => {
                 if location.x >= 1 {
-                    return Some(Vec2::new(location.x -1, location.y));
+                    return Some(Vec2::new(location.x - 1, location.y));
                 }
             }
         }
