@@ -1,5 +1,6 @@
 type NodeId = usize;
 
+
 pub struct Node<T> {
     neighbors : Vec<NodeId>,
 
@@ -15,6 +16,10 @@ impl<T> Graph<T> {
         Graph {
             nodes : Vec::new()
         }
+    }
+
+    pub fn len(&self) -> usize {
+        self.nodes.len()
     }
 
     pub fn new_node(&mut self, data: T) -> NodeId {

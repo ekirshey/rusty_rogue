@@ -4,8 +4,7 @@ use super::player;
 use super::{ Game, GameOptions, Input};
 use utils;
 use super::input;
-use entity::{Entity, Attackable};
-use world::{World, WorldNode, Dungeon, Room};
+use world::{WorldNode, Dungeon};
 
 use self::cursive::Printer;
 use self::cursive::theme::{Color, ColorStyle, Effect};
@@ -161,9 +160,6 @@ impl RogueView {
 
         let room = dungeon.active_room();
 
-        let x_offset = vp_width/2 - room.width()/2;
-        let y_offset = vp_height/2 - room.height()/2;
-
         for ( i, cell) in room.tiles().iter().enumerate() {
             let x = i % room.width();
             let y = i / room.width();
@@ -242,14 +238,9 @@ impl cursive::view::View for RogueView {
         true
     }
 
-    fn on_event(&mut self, event: Event) -> EventResult {
-        //else if let Event::Char(key) = event {
-        //    input = Input::Key(key);
-        //}
-        
+    fn on_event(&mut self, event: Event) -> EventResult {   
         let mut input : input::Input = Input::Unknown;
         if let Event::Key(key) = event {     
-            self.update_mouse_offset(); 
             input = match key {
                 Key::Right => Input::Right,
                 Key::Left => Input::Left,
@@ -295,6 +286,7 @@ impl cursive::view::View for RogueView {
 
         if input != Input::Unknown {
             self.game.handle_input(&input);
+            self.update_mouse_offset();
             return EventResult::Consumed(None);
         }
 

@@ -164,22 +164,18 @@ impl Game {
     fn process_move(&mut self, x_dir : i32, y_dir : i32) {
         let mut lcl_x = x_dir;
         let mut lcl_y = y_dir;
-        let new_pos : Vec2<usize>;
 
-        {
-            let pos = self.player.position();
-            if (pos.x as i32 + x_dir) < 0 {
-                lcl_x = 0;
-            }
-
-            if (pos.y as i32 + y_dir) < 0 {
-                lcl_y = 0;
-            }
-
-            new_pos = Vec2::new((pos.x as i32 + lcl_x) as usize, 
-                                (pos.y as i32 + lcl_y) as usize);
+        let pos = *self.player.position();
+        if (pos.x as i32 + x_dir) < 0 {
+            lcl_x = 0;
         }
 
+        if (pos.y as i32 + y_dir) < 0 {
+            lcl_y = 0;
+        }
+        let new_pos = Vec2::new((pos.x as i32 + lcl_x) as usize, 
+                                (pos.y as i32 + lcl_y) as usize);
+                                
         self.world.handle_player_input(&mut self.player, new_pos, &mut self.log);
 
         self.step = true;

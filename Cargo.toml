@@ -5,6 +5,7 @@ authors = ["Erik Kirshey <ekirshey@gmail.com>"]
 
 [dependencies]
 chrono = "0.4"
+rand = "0.5.4"
 
 [features]
 default = []

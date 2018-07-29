@@ -1,7 +1,13 @@
+use world::Direction;
+
+#[derive(Debug)]
 pub enum CellType {
     Wall,
     Granite,
-    Exit,
+    Exit {
+        node_id : usize,
+        exiting_direction : Direction
+    },
 }
 
 impl CellType {
@@ -9,7 +15,7 @@ impl CellType {
         match *self {
             CellType::Wall => '#',
             CellType::Granite => '.',
-            CellType::Exit => ' ',
+            CellType::Exit{node_id, exiting_direction} => ' ',
         }
     }
 
@@ -17,7 +23,7 @@ impl CellType {
         match *self {
             CellType::Wall => true,
             CellType::Granite => false,
-            CellType::Exit => false,
+            CellType::Exit{node_id, exiting_direction} => false,
         }
     }
 }

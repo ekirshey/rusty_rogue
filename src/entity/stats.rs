@@ -4,10 +4,12 @@ use utils::Vec2;
 pub enum Facing {
     North,
     East,
+    
     South,
     West
 }
 
+// Change this whole name thing
 impl Facing {
     pub fn position(&self, pos : Vec2<usize>) -> Vec2<usize> {
         match *self {

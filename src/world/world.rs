@@ -1,4 +1,4 @@
-use utils::{Vec2, Graph, Node};
+use utils::{Vec2, Graph};
 use entity::EntityMap;
 use world::Dungeon;
 use player::Player;

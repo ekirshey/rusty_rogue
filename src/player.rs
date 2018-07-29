@@ -1,6 +1,5 @@
 use std::fmt;
 use utils::Vec2;
-use utils::Vec3;
 use entity::{StatBlock, Facing, Attack, CombatResult, AttackType};
 
 #[derive(Debug, Copy, Clone)]
