@@ -1,5 +1,5 @@
-use super::attack::Attackable;
-use super::display::Drawable;
+use entity::Attackable;
+use entity::Drawable;
 use std::collections::HashMap;
 
 // Create Entity concept

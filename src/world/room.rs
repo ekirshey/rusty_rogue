@@ -1,14 +1,15 @@
 extern crate rand;
 
+use std::collections::HashMap;
+use std::borrow::BorrowMut;
+use self::rand::prelude::*;
+
 use utils::Vec2;
-use world::{Cell, CellType};
-use entity::{EntityMap, Entity};
+use world::{Tile, TileType};
+use entity::{EntityMap, Entity, Attack};
 use player::Player;
 use log::Log;
 use world::Direction;
-use std::collections::HashMap;
-
-use self::rand::prelude::*;
 
 // Entities
 use goblin::Goblin;
@@ -28,25 +29,21 @@ pub struct RoomProperties {
 pub struct Room {
     size : Vec2<usize>,
     init_pos : Vec2<usize>,
-    tiles : Vec<Cell>,
+    tiles : Vec<Tile>,
     entrances : Vec<Entrance>,
     entities : EntityMap
 }
 
-fn test_create_goblin() -> Box<Entity> {
-    Box::new(Goblin::new(Vec2::new(5,5)))
-}
-
 impl Room {
     pub fn new(size : Vec2<usize>) -> Room {
-        let c = Cell::new();
+        let t = Tile::new();
 
-        let mut tiles = vec![c; size.x*size.y];
+        let mut tiles = vec![t; size.x*size.y];
         for i in 0..tiles.len() {
             let x = i % size.x;
             let y = i / size.x;
             if x != 0 && y != 0 && x != size.x-1 && y != size.y-1 {
-                tiles[i].id = CellType::Granite;
+                tiles[i].id = TileType::Granite;
             }
         }
 
@@ -60,19 +57,13 @@ impl Room {
             let mut pos = Vec2::new(rand::thread_rng().gen_range(2, size.x-1),
                                 rand::thread_rng().gen_range(2, size.y-1));
             
-            // Might be better to just generate them all then shift them around?
-            let mut stop = false;
-            while !stop {
-                stop = true;
-                for (_, e) in &entities {
-                    if *e.position() == pos {
-                        pos = Vec2::new(rand::thread_rng().gen_range(2, size.x-1),
-                                        rand::thread_rng().gen_range(2, size.y-1));    
-                        stop = false; 
-                        break;
-                    }
-                }
+            while tiles[pos.x + pos.y * size.x].occupied {
+                pos = Vec2::new(rand::thread_rng().gen_range(2, size.x-1),
+                                rand::thread_rng().gen_range(2, size.y-1));    
             }
+
+            tiles[pos.x + pos.y * size.x].occupied = true;
+            tiles[pos.x + pos.y * size.x].uuid = uuid;
 
             let bc = Box::new(Goblin::new(pos));
             entities.insert(uuid, bc);
@@ -99,18 +90,19 @@ impl Room {
     }
 
     pub fn add_neighbor(&mut self, direction : Direction, neighbor_id : usize) {
-        let exit_cell = CellType::Exit{
+        let exit_tile = TileType::Exit{
             node_id : neighbor_id,
             exiting_direction : direction
         };
 
         let size = self.size;
         let mut position : Vec2<usize>;
+        // I think I can shrink this by doing NORTH || SOUTH and using apply direction
         match direction {
             Direction::North => {
                 let rng = rand::thread_rng().gen_range(1, size.x-1);
                 position = Vec2::new(rng, 0);
-                self.get_cell_mut(position).id = exit_cell;
+                self.get_tile_mut(position).id = exit_tile;
                 self.entrances.push(Entrance {
                     location : Vec2::new(position.x, position.y+1),
                     direction : direction
@@ -119,7 +111,7 @@ impl Room {
             Direction::East => {
                 let rng = rand::thread_rng().gen_range(1, size.y-1);
                 position = Vec2::new(size.x-1, rng);
-                self.get_cell_mut(position).id = exit_cell;
+                self.get_tile_mut(position).id = exit_tile;
                 self.entrances.push(Entrance {
                     location : Vec2::new(position.x-1, position.y),
                     direction : direction
@@ -128,7 +120,7 @@ impl Room {
             Direction::South => {
                 let rng = rand::thread_rng().gen_range(1, size.x-1);
                 position = Vec2::new(rng, size.y-1);
-                self.get_cell_mut(position).id = exit_cell;
+                self.get_tile_mut(position).id = exit_tile;
                 self.entrances.push(Entrance {
                     location : Vec2::new(position.x, position.y-1),
                     direction : direction
@@ -137,7 +129,7 @@ impl Room {
             Direction::West => {
                 let rng = rand::thread_rng().gen_range(1, size.y-1);
                 position = Vec2::new(0, rng);
-                self.get_cell_mut(position).id = exit_cell;
+                self.get_tile_mut(position).id = exit_tile;
                 self.entrances.push(Entrance {
                     location : Vec2::new(position.x+1, position.y),
                     direction : direction
@@ -146,7 +138,7 @@ impl Room {
         }
     }
 
-    pub fn tiles(&self) -> &Vec<Cell> {
+    pub fn tiles(&self) -> &Vec<Tile> {
         &self.tiles
     }
 
@@ -165,8 +157,8 @@ impl Room {
     pub fn valid_position(&self, pos : Vec2<usize> ) -> bool {
         if pos.x < self.size.x && pos.y < self.size.y {
             let result = self.tiles.get(pos.x + pos.y * self.size.x);
-            if let Some(cell) = result {
-                return !cell.id.collidable();
+            if let Some(Tile) = result {
+                return !Tile.id.collidable();
             }
             else {
                 return false;
@@ -188,6 +180,24 @@ impl Room {
                     }
                 }
             }
+            else {
+                let curr_pos = *m.position();
+                let mut res : Option<Attack>;
+                {
+                    let m_mut : &mut Entity = m.borrow_mut();
+                    res = m_mut.update(player, &self.tiles, self.size); 
+                }
+                if let Some(attack) = res {
+                    player.receive_attack(&attack);
+                }
+                
+                // Do this either way. In case I want move+attack action?
+                let new_pos = *m.position();
+                self.tiles[curr_pos.x + curr_pos.y * self.size.x].occupied = false;
+                self.tiles[new_pos.x + new_pos.y * self.size.x].occupied = true;
+                self.tiles[new_pos.x + new_pos.y * self.size.x].uuid = *uuid;
+                
+            }
         }
         
         for uuid in &rem {
@@ -206,7 +216,7 @@ impl Room {
     pub fn handle_player_input( &mut self, 
                                 player : &mut Player,
                                 new_pos : Vec2<usize>,
-                                log : &mut Log) -> CellType
+                                log : &mut Log) -> TileType
     {
         let mut blocked = false;
         for (uuid, mut m) in &mut self.entities {
@@ -225,14 +235,18 @@ impl Room {
             player.move_player(new_pos);
         }
 
-        self.get_cell_type(new_pos)
+        self.get_tile_type(new_pos)
     }
 
-    fn get_cell_mut(&mut self, loc : Vec2<usize>) -> &mut Cell {
+    fn get_tile(&mut self, loc : Vec2<usize>) -> &Tile {
+        &self.tiles[loc.x + loc.y * self.size.x]
+    }
+
+    fn get_tile_mut(&mut self, loc : Vec2<usize>) -> &mut Tile {
         &mut self.tiles[loc.x + loc.y * self.size.x]
     }
 
-    fn get_cell_type(&self, loc : Vec2<usize>) -> CellType {
+    fn get_tile_type(&self, loc : Vec2<usize>) -> TileType {
         self.tiles[loc.x + loc.y * self.size.x].id
     }
 }

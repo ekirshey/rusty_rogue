@@ -1,14 +1,16 @@
 use world::Direction;
 use utils::Vec3;
 
-pub struct CellDisplay {
+// I need to rethink this tile structure
+// I think I put too much into tiletype instead of tile
+pub struct TileDisplay {
     pub fg : Vec3<u8>,
     pub bg : Vec3<u8>,
     pub icon : char
 }
 
 #[derive(Debug)]
-pub enum CellType {
+pub enum TileType {
     Wall,
     Granite,
     Exit {
@@ -17,23 +19,23 @@ pub enum CellType {
     },
 }
 
-impl CellType {
+impl TileType {
     // Maybe move this out into some sort of "colorizer" object
-    // that takes in the cell type and the dungeon "theme" to 
+    // that takes in the tile type and the dungeon "theme" to 
     // determine what the appropraite color should be
-    pub fn value(&self) -> CellDisplay {
+    pub fn value(&self) -> TileDisplay {
         match *self {
-            CellType::Wall => CellDisplay {
+            TileType::Wall => TileDisplay {
                 fg : Vec3::new(255, 255, 255),
                 bg : Vec3::new(95,95,95),
                 icon : '#'
             },
-            CellType::Granite => CellDisplay {
+            TileType::Granite => TileDisplay {
                 fg : Vec3::new(255, 255, 255),
                 bg : Vec3::new(95,95,95),
                 icon : '.'
             },
-            CellType::Exit{node_id, exiting_direction} => CellDisplay {
+            TileType::Exit{node_id, exiting_direction} => TileDisplay {
                 fg : Vec3::new(0, 0, 0),
                 bg : Vec3::new(255, 242, 0),
                 icon : ' '
@@ -43,30 +45,34 @@ impl CellType {
 
     pub fn collidable(&self) -> bool {
         match *self {
-            CellType::Wall => true,
-            CellType::Granite => false,
-            CellType::Exit{node_id, exiting_direction} => false,
+            TileType::Wall => true,
+            TileType::Granite => false,
+            TileType::Exit{node_id, exiting_direction} => false,
         }
     }
 }
 
-impl Copy for CellType { }
+impl Copy for TileType { }
 
-impl Clone for CellType {
-    fn clone(&self) -> CellType {
+impl Clone for TileType {
+    fn clone(&self) -> TileType {
         *self
     }
 }
 
 #[derive(Copy, Clone)]
-pub struct Cell {
-    pub id : CellType
+pub struct Tile {
+    pub id : TileType,
+    pub occupied : bool,
+    pub uuid : usize
 }
 
-impl Cell {
-    pub fn new() -> Cell {
-        Cell {
-            id : CellType::Wall
+impl Tile {
+    pub fn new() -> Tile {
+        Tile {
+            id : TileType::Wall,
+            occupied : false,
+            uuid : 0
         }
     }
 }

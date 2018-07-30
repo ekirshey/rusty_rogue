@@ -162,11 +162,11 @@ impl RogueView {
 
         printer.print((0,0), &dungeon.active_room_id().to_string());
 
-        for ( i, cell) in room.tiles().iter().enumerate() {
+        for ( i, tile) in room.tiles().iter().enumerate() {
             let x = i % room.width();
             let y = i / room.width();
 
-            let display = cell.id.value();
+            let display = tile.id.value();
             let symbol = display.icon.to_string();
             let fg = Color::Rgb( display.fg.x, display.fg.y, display.fg.z );
             let bg = Color::Rgb( display.bg.x, display.bg.y, display.bg.z );

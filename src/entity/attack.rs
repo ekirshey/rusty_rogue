@@ -2,7 +2,7 @@ use utils::Vec2;
 use entity::StatBlock;
 use entity::EntityMap;
 
-use world::World;
+use world::Tile;
 use player::Player;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -45,7 +45,7 @@ impl Attack {
 }
 
 pub trait Attackable {
-    fn update(&self, player : &Player, entities : &EntityMap, world : &World) -> Option<Attack>;
+    fn update(&mut self, player : &Player, tiles : &Vec<Tile>, room_size : Vec2<usize>) -> Option<Attack>;
     fn receive_attack(&mut self, attack : &Attack) -> CombatResult; 
     fn collision(&self, other : Vec2<usize>) -> bool;
 

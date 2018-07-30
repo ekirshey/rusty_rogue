@@ -7,7 +7,7 @@ use player::Player;
 use log::Log;
 use world::Room;
 use world::Direction;
-use world::CellType;
+use world::TileType;
 use world::DungeonBuilder;
 
 use self::rand::prelude::*;
@@ -123,11 +123,11 @@ impl Dungeon {
 
         let floorid = self.active_floor;
         let roomid = self.active_room;
-        let cell_type = self.get_mut_room(floorid, roomid)
+        let tile_type = self.get_mut_room(floorid, roomid)
                             .handle_player_input(player, new_pos, log);
         
 
-        if let CellType::Exit{node_id, exiting_direction} = cell_type {
+        if let TileType::Exit{node_id, exiting_direction} = tile_type {
             let mut entering_direction = exiting_direction;
             entering_direction.invert();
             

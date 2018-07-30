@@ -1,8 +1,9 @@
+use std::ops::BitXor;
 use utils::Vec2;
 use utils::Vec3;
-use world::World;
+use world::Tile;
 use entity::{Attackable, Attack, AttackType, CombatResult, 
-             StatBlock, Facing, Drawable, DrawOutput, EntityMap};
+             StatBlock, Facing, Drawable, DrawOutput};
 use super::player::Player;
 
 
@@ -18,8 +19,8 @@ impl Goblin {
     pub fn new(pos : Vec2<usize>) -> Goblin {
         Goblin {
             pos,
-            base_stats : StatBlock::new(30,10,10),
-            curr_stats : StatBlock::new(30,10,10),
+            base_stats : StatBlock::new(2,2,2),
+            curr_stats : StatBlock::new(2,2,2),
             facing : Facing::North,
             alive : true
         }
@@ -27,13 +28,43 @@ impl Goblin {
 }
 
 impl Attackable for Goblin {
-    fn update(&self, player : &Player, entities : &EntityMap, world : &World) -> Option<Attack> {
-        // Goblin should probably have some sort of AI object
-        // that generates the actions
-        
-        let atk_pos = self.facing.position(self.pos);
-        let damage = (self.curr_stats.strength * 3)/2;
-        Some(Attack::new(AttackType::Piercing, damage, atk_pos))
+    fn update(&mut self, player : &Player, tiles : &Vec<Tile>, room_size : Vec2<usize>) -> Option<Attack> {
+        let m_pos = Vec2::new(self.position().x  as i32, self.position().y  as i32);
+        let p_pos = Vec2::new(player.position().x as i32, player.position().y as i32); 
+        let diff = p_pos - m_pos;
+        if diff.x.abs().bitxor(diff.y.abs()) == 1 {
+            let atk_pos = self.facing.position(self.pos);
+            let damage = self.curr_stats.strength;
+            return Some(Attack::new(AttackType::Piercing, damage, atk_pos));
+        }
+        else {
+            let mut n_x = 0;
+            let mut n_y = 0;
+
+            if diff.x != 0 {
+                n_x = diff.x/diff.x.abs();
+            }
+            if diff.y != 0 {
+                n_y = diff.y/diff.y.abs();
+            }
+
+            let normal = Vec2::new(n_x, n_y);
+            let new_pos = m_pos + normal;
+
+            if diff.y.abs() > diff.x.abs() &&
+               new_pos.y > 0 && 
+               !tiles[self.pos.x + new_pos.y as usize * room_size.x].occupied 
+            {
+                self.pos.y = new_pos.y as usize;
+            }
+            else if new_pos.x > 0 && 
+               !tiles[new_pos.x as usize + self.pos.y * room_size.x].occupied 
+            {
+                self.pos.x = new_pos.x as usize;
+            }
+        }
+
+        None
     }
 
     fn receive_attack(&mut self, attack : &Attack) -> CombatResult {
