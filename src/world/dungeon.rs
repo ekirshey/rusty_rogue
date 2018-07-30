@@ -2,7 +2,7 @@ extern crate rand;
 
 use utils::Graph;
 use utils::Vec2;
-use entity::{EntityMap};
+use entity::{EntityMap, CorpseMap};
 use player::Player;
 use log::Log;
 use world::Room;
@@ -99,6 +99,11 @@ impl Dungeon {
     pub fn get_entities(&self) -> &EntityMap {
         let room = self.get_room(self.active_floor, self.active_room);
         room.get_entities()
+    }
+
+    pub fn get_corpses(&self) -> &CorpseMap {
+        let room = self.get_room(self.active_floor, self.active_room);
+        room.get_corpses()
     }
 
     pub fn get_mut_entities(&mut self) -> &mut EntityMap {

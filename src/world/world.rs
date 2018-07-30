@@ -1,5 +1,5 @@
 use utils::{Vec2, Graph};
-use entity::EntityMap;
+use entity::{EntityMap, CorpseMap};
 use world::Dungeon;
 use player::Player;
 use log::Log;
@@ -65,7 +65,13 @@ impl World {
             WorldNode::DungeonNode(ref dungeon) => dungeon.starting_position(),
             _ => Vec2::new(0,0),
         }
+    }
 
+    pub fn get_corpses(&self) -> Option<&CorpseMap> {
+        let result = self.get_node(self.active_node);
+        match result {
+            WorldNode::DungeonNode(ref dungeon) => return Some(dungeon.get_corpses()),
+        }
     }
 
     pub fn get_entities(&self) -> Option<&EntityMap> {

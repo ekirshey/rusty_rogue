@@ -6,7 +6,7 @@ use self::rand::prelude::*;
 
 use utils::Vec2;
 use world::{Tile, TileType};
-use entity::{EntityMap, Entity, Attack};
+use entity::{EntityMap, Entity, CorpseMap, Corpse, Attack};
 use player::Player;
 use log::Log;
 use world::Direction;
@@ -31,19 +31,22 @@ pub struct Room {
     init_pos : Vec2<usize>,
     tiles : Vec<Tile>,
     entrances : Vec<Entrance>,
-    entities : EntityMap
+    entities : EntityMap,
+    corpses : CorpseMap
 }
 
 impl Room {
     pub fn new(size : Vec2<usize>) -> Room {
-        let t = Tile::new();
+        let mut tiles = Vec::new();
 
-        let mut tiles = vec![t; size.x*size.y];
-        for i in 0..tiles.len() {
+        for i in 0..size.x*size.y {
             let x = i % size.x;
             let y = i / size.x;
             if x != 0 && y != 0 && x != size.x-1 && y != size.y-1 {
-                tiles[i].id = TileType::Granite;
+                tiles.push(Tile::new(TileType::Granite));
+            }
+            else {
+                tiles.push(Tile::new(TileType::Wall));
             }
         }
 
@@ -52,7 +55,8 @@ impl Room {
 
         let mut entities : EntityMap = HashMap::new();
         // Max range should be based on area I think
-        let num_gobbos = rand::thread_rng().gen_range(0, 5);
+        let available_space = size.x * size.y - (size.y *2) - (size.x-2 * 2);
+        let num_gobbos = rand::thread_rng().gen_range(1, available_space/3);
         for i in 0..num_gobbos {
             let mut pos = Vec2::new(rand::thread_rng().gen_range(2, size.x-1),
                                 rand::thread_rng().gen_range(2, size.y-1));
@@ -75,7 +79,8 @@ impl Room {
             init_pos : Vec2::new(1,1),
             tiles,
             entrances : Vec::new(),
-            entities
+            entities,
+            corpses : HashMap::new()
         }
     }
 
@@ -201,12 +206,21 @@ impl Room {
         }
         
         for uuid in &rem {
+            let pos = *self.entities.get(uuid).unwrap().position();
+            self.corpses.insert(*uuid, Corpse::new(pos));
+
+            self.get_tile_mut(pos).occupied = false;
+            self.get_tile_mut(pos).corpses.push(*uuid);
             self.entities.remove(uuid);
         }
     }
 
     pub fn get_entities(&self) -> &EntityMap {
         &self.entities
+    }
+
+    pub fn get_corpses(&self) -> &CorpseMap {
+        &self.corpses
     }
 
     pub fn get_mut_entities(&mut self) -> &mut EntityMap {

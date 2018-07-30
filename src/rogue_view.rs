@@ -78,7 +78,6 @@ impl RogueView {
         );
     }
 
-
     fn draw_target_info(&self, start : vec::Vec2, printer: &Printer) {
         let curr_stats = self.game.target_current_stats().unwrap();
         let base_stats = self.game.target_base_stats().unwrap();
@@ -118,7 +117,6 @@ impl RogueView {
             |printer| printer.print((x,y), base_health.as_ref())
         );
     }
-
 
     fn draw_info(&self, printer: &Printer) {
         let vp_width = self.game.viewport_width();
@@ -178,31 +176,43 @@ impl RogueView {
             );
         } 
 
-        // draw entities
-        let result = self.game.get_entities();
-        if let Some(entities) = result {
-            for (uuid, e) in entities.iter() {
-                let display = e.draw();
-                let pos = display.position;
+        let corpses = dungeon.get_corpses();
+        for (uuid, c) in corpses.iter() {
+            let display = c.draw();
+            let pos = display.position;
 
-                let symbol = display.icon.to_string();
-                let fg = Color::Rgb( display.fg.x, display.fg.y, display.fg.z );
-                let mut bg = Color::Rgb( display.bg.x, display.bg.y, display.bg.z );
-                let result = self.game.player().target();
-                if let Some(target) = result {
-                    if target == *uuid {
-                        bg = Color::Rgb(50,50,50);
-                    }
-                }
-                printer.with_color(
-                    ColorStyle::new(fg, bg),
-                    |printer| printer.print(
-                                    (self.offset.x + pos.x, self.offset.y + pos.y), &symbol),
-                );
-                
-            }
+            let symbol = display.icon.to_string();
+            let fg = Color::Rgb( display.fg.x, display.fg.y, display.fg.z );
+            let bg = Color::Rgb( display.bg.x, display.bg.y, display.bg.z );
+            printer.with_color(
+                ColorStyle::new(fg, bg),
+                |printer| printer.print(
+                                (self.offset.x + pos.x, self.offset.y + pos.y), &symbol),
+            );
         }
 
+        // draw entities
+        let entities = dungeon.get_entities();
+        for (uuid, e) in entities.iter() {
+            let display = e.draw();
+            let pos = display.position;
+
+            let symbol = display.icon.to_string();
+            let fg = Color::Rgb( display.fg.x, display.fg.y, display.fg.z );
+            let mut bg = Color::Rgb( display.bg.x, display.bg.y, display.bg.z );
+            let result = self.game.player().target();
+            if let Some(target) = result {
+                if target == *uuid {
+                    bg = Color::Rgb(50,50,50);
+                }
+            }
+            printer.with_color(
+                ColorStyle::new(fg, bg),
+                |printer| printer.print(
+                                (self.offset.x + pos.x, self.offset.y + pos.y), &symbol),
+            );
+        }
+        
         // Draw Player
         let pos = player.position();
         let pos_x = self.offset.x + pos.x;

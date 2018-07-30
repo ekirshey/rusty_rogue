@@ -60,19 +60,20 @@ impl Clone for TileType {
     }
 }
 
-#[derive(Copy, Clone)]
 pub struct Tile {
     pub id : TileType,
     pub occupied : bool,
-    pub uuid : usize
+    pub uuid : usize,
+    pub corpses : Vec<usize>
 }
 
 impl Tile {
-    pub fn new() -> Tile {
+    pub fn new(id : TileType) -> Tile {
         Tile {
-            id : TileType::Wall,
+            id,
             occupied : false,
-            uuid : 0
+            uuid : 0,
+            corpses : Vec::new()
         }
     }
 }
