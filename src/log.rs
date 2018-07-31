@@ -57,15 +57,29 @@ impl Log {
         }
     }
 
-    pub fn last_n_messages(&self, n : usize) -> &[String] {
+    pub fn last_n_messages(&self, n : usize) -> Vec<String> {
+        let msg_count = if n >= self.contents.len() {self.contents.len()} else {n};
+        let mut log = vec![String::new(); msg_count];
+
         if self.contents.is_empty() {
-            return &[]
+            return log;
         }
 
-        let msg_count = if n >= self.contents.len() {self.contents.len()} else {n};
+        let mut i = if self.front > 0 {self.front-1} else {self.contents.len()-1}; 
+        let mut insert = log.len()-1;
+        for _ in 0..msg_count {
+            let msg = self.contents[i].clone();
+            log[insert] = msg;
+            if ( i == 0) {
+                i = self.contents.len()-1;
+            }
+            else {
+                i -= 1;
+            }
 
-        let start = self.contents.len() - msg_count;
-        let end = self.contents.len();
-        &self.contents[start..end]
+            insert = if insert > 0 { insert - 1} else {insert};
+        }
+
+        return log;
     }
 }

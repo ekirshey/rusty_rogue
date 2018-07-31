@@ -110,7 +110,7 @@ impl Game {
         self.viewport.y
     }
 
-    pub fn get_log_messages(&self, msg_count : usize) -> &[String] {
+    pub fn get_log_messages(&self, msg_count : usize) -> Vec<String> {
         self.log.last_n_messages(msg_count)
     }
 
